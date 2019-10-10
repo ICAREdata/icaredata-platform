@@ -1,0 +1,17 @@
+Resources:
+  ApiGateway:
+    Type: "AWS::Serverless::Api"
+    Properties:
+      StageName: dev
+  MainLambda:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs10.x
+      Events:
+        PostTest:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /test
+            Method: get
