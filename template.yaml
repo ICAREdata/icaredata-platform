@@ -9,6 +9,7 @@ Parameters:
     Type: String
   DbPwd:
     Type: String
+    NoEcho: true
 Resources:
   ApiGateway:
     Type: "AWS::Serverless::Api"
