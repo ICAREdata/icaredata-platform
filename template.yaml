@@ -8,6 +8,12 @@ Resources:
     Properties:
       Handler: index.handler
       Runtime: nodejs10.x
+      Environment:
+        Variables:
+          PGHOST: docker.for.mac.localhost
+          PGUSER: postgres
+          PGDATABASE: postgres
+          PGPASSWORD: docker
       Events:
         PostTest:
           Type: Api

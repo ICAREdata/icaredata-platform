@@ -1,4 +1,9 @@
+const { Client } = require("pg");
+const client = new Client();
+
 exports.handler = async event => {
-  console.log("something is happening");
-  return { statusCode: 200 };
+  await client.connect();
+  const resp = await client.query("SELECT NOW()");
+  await client.end();
+  return { statusCode: 200, body: { dbTime: resp.rows[0].now } };
 };
