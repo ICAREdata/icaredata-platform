@@ -45,7 +45,7 @@ Run `npm install`.
 Once installed, run
 
 ```bash
-sam local start-api
+sam local start-api --parameter-overrides 'ParameterKey=DbUser,ParameterValue=username ParameterKey=DbPwd,ParameterValue=password'
 ```
 
 You should be able to send a get request to http://127.0.0.1:3000/test. It should log a statement to the terminal showing the database time.

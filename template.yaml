@@ -1,3 +1,14 @@
+Parameters:
+  Database:
+    Default: postgres
+    Type: String
+  DbHost:
+    Default: docker.for.mac.localhost # because sam local runs in a docker container
+    Type: String
+  DbUser:
+    Type: String
+  DbPwd:
+    Type: String
 Resources:
   ApiGateway:
     Type: "AWS::Serverless::Api"
@@ -10,10 +21,10 @@ Resources:
       Runtime: nodejs10.x
       Environment:
         Variables:
-          PGHOST: docker.for.mac.localhost
-          PGUSER: postgres
-          PGDATABASE: postgres
-          PGPASSWORD: docker
+          PGHOST: !Ref DbHost
+          PGUSER: !Ref DbUser
+          PGDATABASE: !Ref Database
+          PGPASSWORD: !Ref DbPwd
       Events:
         PostTest:
           Type: Api
