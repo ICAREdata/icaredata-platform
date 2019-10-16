@@ -32,6 +32,12 @@ Once open, right click on servers and choose to create a server. Name the server
 
 Once connected, right click on the server and create a new database (I called this Dev).
 
+## Install Node
+
+[Install node/npm/npx through nvm](https://github.com/nvm-sh/nvm)
+
+Run `npm install`.
+
 ## SAM CLI
 
 [Install SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install-mac.html)
