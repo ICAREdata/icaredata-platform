@@ -1,4 +1,4 @@
-CREATE TABLE trial_data (
+CREATE TABLE messages (
 	ID SERIAL PRIMARY KEY,
 	site_id VARCHAR NOT NULL,
 	trial_id VARCHAR NOT NULL,
