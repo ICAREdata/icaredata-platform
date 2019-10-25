@@ -31,8 +31,8 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref ApiGateway
-            Path: /test
-            Method: get
+            Path: /DSTU2/$process-message
+            Method: post
   ConformanceLambda:
     Type: "AWS::Serverless::Function"
     Properties:
@@ -45,3 +45,4 @@ Resources:
             RestApiId: !Ref ApiGateway
             Path: /metadata
             Method: get
+
