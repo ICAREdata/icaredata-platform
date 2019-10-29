@@ -33,3 +33,15 @@ Resources:
             RestApiId: !Ref ApiGateway
             Path: /test
             Method: get
+  ConformanceLambda:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      Handler: conformance.handler
+      Runtime: nodejs10.x
+      Events:
+        GetConformance:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /metadata
+            Method: get

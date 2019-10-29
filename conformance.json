@@ -1,0 +1,11 @@
+{
+  "resourceType": "Conformance",
+  "url": "127.0.0.1:3000",
+  "version": "0.0.0",
+  "experimental": true,
+  "date": "2019-10-29",
+  "kind": "capability",
+  "fhirVersion": "dstu2",
+  "acceptUnknown": "no",
+  "format": ["json"]
+}
