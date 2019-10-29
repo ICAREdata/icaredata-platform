@@ -1,0 +1,13 @@
+{
+  "resourceType": "Conformance",
+  "url": "127.0.0.1:3000/metadata",
+  "version": "0.0.0",
+  "experimental": true,
+  "date": "2019-10-29",
+  "kind": "capability",
+  "fhirVersion": "1.0.2",
+  "acceptUnknown": "no",
+  "format": [
+    "application/json+fhir"
+  ]
+}
