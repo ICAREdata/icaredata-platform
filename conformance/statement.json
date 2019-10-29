@@ -7,5 +7,7 @@
   "kind": "capability",
   "fhirVersion": "dstu2",
   "acceptUnknown": "no",
-  "format": ["json"]
+  "format": [
+    "json"
+  ]
 }
