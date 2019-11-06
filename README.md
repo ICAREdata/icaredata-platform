@@ -38,22 +38,6 @@ I use [pgAdmin](https://www.pgadmin.org/download/), but you can use whichever cl
 
 Once open, right click on servers and choose to create a server. Name the server (I called it ICAREdata Local). In the connection tab, fill in localhost for the host and docker for the password. Connect to this server.
 
-## Install Node
-
-[Install node/npm/npx through nvm](https://github.com/nvm-sh/nvm)
-
-Run `npm install`.
-
-## SAM CLI
-
-You should have SAM installed from previous steps. Run
-
-```bash
-sam local start-api --parameter-overrides 'ParameterKey=DbUser,ParameterValue=postgres ParameterKey=DbPwd,ParameterValue=docker'
-```
-
-You should be able to send a get request to http://127.0.0.1:3000/test. It should log a statement to the terminal showing the database time.
-
 ## ORY Hydra
 
 [source](https://www.ory.sh/docs/hydra/configure-deploy)
@@ -83,3 +67,19 @@ Check if the hydra server is running
 ```bash
 docker logs ory-hydra
 ```
+
+## Install Node
+
+[Install node/npm/npx through nvm](https://github.com/nvm-sh/nvm)
+
+Run `npm install`.
+
+## SAM CLI
+
+You should have SAM installed from previous steps. Run
+
+```bash
+sam local start-api --parameter-overrides 'ParameterKey=DbUser,ParameterValue=postgres ParameterKey=DbPwd,ParameterValue=docker'
+```
+
+You should be able to send a get request to http://127.0.0.1:3000/test. It should log a statement to the terminal showing the database time.
