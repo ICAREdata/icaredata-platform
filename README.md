@@ -34,7 +34,7 @@ docker run --rm --name icd-pg --network icaredata -e POSTGRES_PASSWORD=docker -d
 
 ## Postgres Client
 
-I use [pgAdmin](https://www.pgadmin.org/download/), but you can use whichever client you prefer.
+Installing a postgres client is really only necessary in order to view and interact with the database directly. I use [pgAdmin](https://www.pgadmin.org/download/), but you can use whichever client you prefer.
 
 Once open, right click on servers and choose to create a server. Name the server (I called it ICAREdata Local). In the connection tab, fill in localhost for the host and docker for the password. Connect to this server.
 
@@ -66,6 +66,22 @@ Check if the hydra server is running
 
 ```bash
 docker logs ory-hydra
+```
+
+To register a client, send a post request to `https://localhost:9001/clients` with headers
+
+```
+Content-Type:application/json
+Accept:application/json
+```
+
+and body
+
+```javascript
+{
+    "client_id": "test2",
+    "token_endpoint_auth_method": "none"
+}
 ```
 
 ## Install Node
