@@ -11,5 +11,12 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/ICAREdata/icaredata-platform"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^8.5.1"
+  },
+  "devDependencies": {
+    "eslint": "^6.6.0",
+    "eslint-config-google": "^0.14.0"
   }
 }
