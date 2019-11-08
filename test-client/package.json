@@ -1,23 +1,13 @@
 {
-  "name": "icaredata",
+  "name": "test-client",
   "version": "0.0.0",
-  "description": "",
+  "description": "Client to test posting fhir message to backend",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "fhirpath": "^0.17.4",
-    "knex": "^0.19.5",
-    "pg": "^7.12.1"
-  },
-  "devDependencies": {
-    "eslint": "^6.6.0",
-    "eslint-config-google": "^0.14.0",
-    "grunt": "^1.0.4"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/ICAREdata/icaredata-platform"
