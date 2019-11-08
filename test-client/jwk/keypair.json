@@ -1,0 +1,13 @@
+{
+    "keys": [
+        {
+            "kty": "RSA",
+            "d": "BQYYY2spzcauotoyxWCOE_ljWVglP5YeirPmzXtJGXKxZTyoxxm12itJYGKe1rq-QargVGVCFshGeS8up9sO1_kp7zfcRU5fy2g_2qy3JRzpIduVSXr2nZ2Nn-MCBLe9qFAgWILBT3ko6GKNldvpQ_i2ACjXHDtJ7-MRLTDwMaIVXnrrnajaz9zGugctaIPP4ZpoShxhD0K9abGollg56rLz7L9GPygdAGpuGQ00lOeq1FeWwZHEDt5Hc0GyA4SEqCwqkur9V05tIhQdNCcjlJnt3Y91ajH2JfnWI1EBTEf47gBc3HLI7EOKUUJ59-aKu6srjIP5iP1iGvTlBGg4UQ",
+            "e": "AQAB",
+            "use": "sig",
+            "kid": "test-client",
+            "alg": "RS384",
+            "n": "nXVWf4RARJ64E7DdTOz07Hfl48eCmXL6GgJjVlLVXKdXh0qPs-icNIoLd9uqdvND_6Yi7PkUsg6ZtIqSECApgeYIneitA2JyE9bF9YpyFU8968Oo9d53UTEATHkxjOMHuDrYxzSAFtRW3oLAQ8OoU353WlVdyi4N2yY0rSEaZG6rhPqPWycFpcl6shh4ku50Or_YNjKFHduH-xY6GKKJL6bY1sS7_5RodTh5MLInfkDm7RS8evzJqcV5FYzYdcpd0qrd_t-XM2fll1WeOfpYjQuEHUS-yLL-HFcyr2aQqsM2i61TAVYoNeMweqejKjB0wpcBT3G76zJVz_NcqQJ53w"
+        }
+    ]
+}
