@@ -15,11 +15,12 @@ Resources:
     Type: "AWS::Serverless::Api"
     Properties:
       StageName: dev
-  MainLambda:
+  MessageLambda:
     Type: "AWS::Serverless::Function"
     Properties:
       Handler: index.handler
       Runtime: nodejs10.x
+      Timeout: 10
       Environment:
         Variables:
           PGHOST: !Ref DbHost
@@ -27,7 +28,7 @@ Resources:
           PGDATABASE: !Ref Database
           PGPASSWORD: !Ref DbPwd
       Events:
-        PostTest:
+        ProcessMessage:
           Type: Api
           Properties:
             RestApiId: !Ref ApiGateway
