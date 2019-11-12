@@ -68,7 +68,7 @@ Check if the hydra server is running
 docker logs ory-hydra
 ```
 
-To register a client, send a post request to `https://localhost:9001/clients` with headers
+To register a client, send a post request without ssl verification to `https://localhost:9001/clients` with headers
 
 ```
 Content-Type:application/json
