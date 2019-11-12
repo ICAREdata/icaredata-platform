@@ -20,7 +20,7 @@ Create a network for the docker containers
 docker network create icaredata
 ```
 
-Create the docker image with the files in the database folder. Inside that folder, run
+Go to the database directory. From there, create the docker image with by running
 
 ```bash
 docker build -t icd-pg .
