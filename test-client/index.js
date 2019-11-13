@@ -8,6 +8,7 @@ const privateKey = fs.readFileSync('test-keys/private.key', 'utf8');
 
 const options = {
   algorithm: 'RS256',
+  // The following comments are from https://build.fhir.org/ig/HL7/bulk-data/authorization/index.html
   keyid: 'e34bd62e-b02d-4607-b360-afbeaeb986c7', // The identifier of the key-pair used to sign this JWT
   expiresIn: '5m', // This time SHALL be no more than five minutes in the future
   issuer: 'test-client', // the client's client_id
