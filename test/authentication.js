@@ -5,7 +5,7 @@ const {JWK, JWS} = require('node-jose');
 const uuidv4 = require('uuid/v4');
 const querystring = require('querystring');
 
-describe('OAuth Server', async () => {
+describe('OAuth server token endpoint', async () => {
   const httpsAgent = new https.Agent({
     rejectUnauthorized: false, // Turn off ssl verification
   });
@@ -89,29 +89,30 @@ describe('OAuth Server', async () => {
     await hydraAdmin.post('/clients', postData);
   });
 
-  it('should return a valid authentication token for the client', async () => {
-    const resp = await getToken();
+  it('should return a valid authentication token for a registered client',
+      async () => {
+        const resp = await getToken();
 
-    expect(resp).to.have.property('data');
-    expect(resp.data).to.have.property('access_token');
-    expect(resp.data).to.have.property('token_type');
-    expect(resp.data).to.have.property('expires_in');
-    expect(resp.data).to.have.property('scope');
+        expect(resp).to.have.property('data');
+        expect(resp.data).to.have.property('access_token');
+        expect(resp.data).to.have.property('token_type');
+        expect(resp.data).to.have.property('expires_in');
+        expect(resp.data).to.have.property('scope');
 
-    expect(resp.data.token_type).to.equal('bearer');
-    // Hydra seems to ignore the exp value
-    // expect(resp.data.expires_in).to.be.at.most(300);
-    expect(resp.data.scope).to.equal('system/*.*');
+        expect(resp.data.token_type).to.equal('bearer');
+        // Hydra seems to ignore the exp value
+        // expect(resp.data.expires_in).to.be.at.most(300);
+        expect(resp.data.scope).to.equal('system/*.*');
 
-    const introspection = await hydraAdmin.post('/oauth2/introspect',
-        querystring.stringify({
-          token: resp.data.access_token,
-          scope: 'system/*.*',
-        }));
-    expect(introspection).to.have.property('data');
-    expect(introspection.data).to.have.property('active');
-    expect(introspection.data.active).to.be.true;
-  });
+        const introspection = await hydraAdmin.post('/oauth2/introspect',
+            querystring.stringify({
+              token: resp.data.access_token,
+              scope: 'system/*.*',
+            }));
+        expect(introspection).to.have.property('data');
+        expect(introspection.data).to.have.property('active');
+        expect(introspection.data.active).to.be.true;
+      });
 
   it('should not return a token when the issuer is invalid', async () => {
     assertInvalid({iss: 'sketchy person'}, 401);
