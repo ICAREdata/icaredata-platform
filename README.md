@@ -86,28 +86,6 @@ You should be able to send a post request to http://127.0.0.1:3000/DSTU2/$proces
 
 ## Running the Test Client
 
-To register the test client with the local hydra server, send a post request to `https://localhost:9001/clients` with the sample public jwk set in the test-client folder. The headers should be 
-
-```
-Content-Type:application/json
-Accept:application/json
-```
-and the body should be
-
-```json
-{
-    "client_id": "test-client",
-    "jwks": {
-	    "keys": [
-	        {
-	            "kty": "RSA",
-	            "e": "AQAB",
-	            "use": "sig",
-	            "kid": "test-client",
-	            "alg": "RS384",
-	            "n": "nXVWf4RARJ64E7DdTOz07Hfl48eCmXL6GgJjVlLVXKdXh0qPs-icNIoLd9uqdvND_6Yi7PkUsg6ZtIqSECApgeYIneitA2JyE9bF9YpyFU8968Oo9d53UTEATHkxjOMHuDrYxzSAFtRW3oLAQ8OoU353WlVdyi4N2yY0rSEaZG6rhPqPWycFpcl6shh4ku50Or_YNjKFHduH-xY6GKKJL6bY1sS7_5RodTh5MLInfkDm7RS8evzJqcV5FYzYdcpd0qrd_t-XM2fll1WeOfpYjQuEHUS-yLL-HFcyr2aQqsM2i61TAVYoNeMweqejKjB0wpcBT3G76zJVz_NcqQJ53w"
-	        }
-	    ]
-    }
-}
+```bash
+npm test
 ```
