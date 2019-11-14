@@ -72,12 +72,17 @@ exports.handler = async (event) => {
   // Finally, try to insert the data into the database
   return knex
       .insert([data])
-      .into('trial_data')
+      .into('messages')
       .then((r) => {
-        return responses.response200;
+        // Set the appropriate positive response parameters and send
+        const response200 = responses.response200;
+        response200.body.entry[0].resource.response.identifier = bundleId;
+        response200.body.entry[0].resource.timestamp = new Date().toISOString();
+        response200.body = JSON.stringify(response200.body);
+        return response200;
       })
       .catch((e) => {
-        return responses.response400;
+        return responses.response500;
       });
 };
 
