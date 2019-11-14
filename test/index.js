@@ -4,7 +4,10 @@ const {JWK, JWS} = require('node-jose');
 const uuidv4 = require('uuid/v4');
 
 describe('Get a valid OAuth Token', async () => {
-  const hydra = axios.create({baseURL: 'https://localhost:9001'});
+  const hydra = axios.create({
+    baseURL: 'https://localhost:9001',
+    headers: {'Accept': 'application/json'},
+  });
   const keystore = JWK.createKeyStore();
   const kid = uuidv4();
 
@@ -12,14 +15,19 @@ describe('Get a valid OAuth Token', async () => {
     await keystore.generate('RSA', 2048, {kid, use: 'sig'});
   });
 
-  it('should register a test client', () => {
+  it('should register a test client', async () => {
     const key = keystore.get(kid).toJSON();
-    hydra.post('/clients', {
-      client_id: 'test-client',
-      jwks: {
-        keys: [key],
-      },
-    });
+    try {
+      const resp = await hydra.post('/clients', {
+        client_id: 'test-client',
+        jwks: {
+          keys: [key],
+        },
+      });
+      console.log(resp);
+    } catch (err) {
+      console.log(err);
+    }
   });
 
   // it('should receive a valid token', async () => {
