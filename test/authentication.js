@@ -64,7 +64,7 @@ describe('Get a valid OAuth Token', async () => {
           iss: clientId,
           sub: clientId,
           aud: `${hydraPublic.defaults.baseURL}${tokenEndpoint}`,
-          exp: new Date().getTime() + 300000,
+          exp: Math.floor(Date.now()/1000) + 300,
           jti: uuidv4(),
         })).final();
 
@@ -78,6 +78,23 @@ describe('Get a valid OAuth Token', async () => {
 
     expect(resp).to.have.property('data');
     expect(resp.data).to.have.property('access_token');
+    expect(resp.data).to.have.property('token_type');
+    expect(resp.data).to.have.property('expires_in');
+    expect(resp.data).to.have.property('scope');
+
+    expect(resp.data.token_type).to.equal('bearer');
+    // Hydra seems to ignore the exp value right now
+    // expect(resp.data.expires_in).to.be.at.most(300);
+    expect(resp.data.scope).to.equal('system/*.*');
+
+    const introspection = await hydraAdmin.post('/oauth2/introspect',
+        querystring.stringify({
+          token: resp.data.access_token,
+          scope: 'system/*.*',
+        }));
+    expect(introspection).to.have.property('data');
+    expect(introspection.data).to.have.property('active');
+    expect(introspection.data.active).to.be.true;
   });
 
   it('should not receive a token for an invalid client', async () => {
