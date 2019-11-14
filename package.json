@@ -9,10 +9,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "fhirpath": "^0.17.4",
+    "knex": "^0.19.5",
     "pg": "^7.12.1"
   },
   "devDependencies": {
     "eslint": "^6.6.0",
-    "eslint-config-google": "^0.14.0"
+    "eslint-config-google": "^0.14.0",
+    "grunt": "^1.0.4"
   }
 }

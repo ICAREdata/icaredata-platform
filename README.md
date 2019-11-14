@@ -98,4 +98,4 @@ You should have SAM installed from previous steps. Run
 sam local start-api --parameter-overrides 'ParameterKey=DbUser,ParameterValue=postgres ParameterKey=DbPwd,ParameterValue=docker'
 ```
 
-You should be able to send a get request to http://127.0.0.1:3000/test. It should log a statement to the terminal showing the database time.
+You should be able to send a post request to http://127.0.0.1:3000/DSTU2/$process-message with a properly formatted FHIR Message in the body. An example of such a FHIR Message Bundle is included in `test/fixtures/message.json`. This will insert the Message and its associated information into the database.
