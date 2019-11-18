@@ -68,22 +68,6 @@ Check if the hydra server is running
 docker logs ory-hydra
 ```
 
-To register a client, send a post request without ssl verification to `https://localhost:9001/clients` with headers
-
-```
-Content-Type:application/json
-Accept:application/json
-```
-
-and body
-
-```javascript
-{
-    "client_id": "test2",
-    "token_endpoint_auth_method": "none"
-}
-```
-
 ## Install Node
 
 [Install node/npm/npx through nvm](https://github.com/nvm-sh/nvm)
@@ -99,3 +83,9 @@ sam local start-api --parameter-overrides 'ParameterKey=DbUser,ParameterValue=po
 ```
 
 You should be able to send a post request to http://127.0.0.1:3000/DSTU2/$process-message with a properly formatted FHIR Message in the body. An example of such a FHIR Message Bundle is included in `test/fixtures/message.json`. This will insert the Message and its associated information into the database.
+
+## Running the Test Client
+
+```bash
+npm test
+```
