@@ -89,3 +89,5 @@ You should be able to send a post request to http://127.0.0.1:3000/DSTU2/$proces
 ```bash
 npm test
 ```
+
+In order to run the FHIR Messaging tests successfully, you must set environment variables in your system for `DbUser` and `DbPwd` correctly configured to your username and password for the database.

@@ -12,8 +12,8 @@ module.exports = {
     client: 'pg',
     connection: {
       host: 'localhost',
-      user: process.env.DbUser,
-      password: process.env.DbPwd,
+      user: process.env.DbUser, // Must set on local system
+      password: process.env.DbPwd, // Must set on local system
       database: 'dev',
     },
   },
