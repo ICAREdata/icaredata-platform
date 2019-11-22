@@ -3,8 +3,8 @@ const _ = require('lodash');
 const {expect} = require('chai');
 const axios = require('axios');
 
-const options = require('../utils/knexfile.js');
-const knex = require('knex')(options.testing);
+const {testing} = require('../utils/knexfile.js');
+const knex = require('knex')(testing);
 
 const originalMessage = require('./fixtures/messaging/message.json');
 
@@ -19,7 +19,7 @@ describe('FHIR Messaging endpoint', async () => {
   const assertStatus = async (msg, expectedStatus) => {
     const resp = await apiGateway.post(
         '/DSTU2/$process-message',
-        JSON.stringify(msg))
+        msg)
         .then((r) => r)
         .catch((e) => e.response);
 
@@ -99,12 +99,6 @@ describe('FHIR Messaging endpoint', async () => {
 
   it('should not post a FHIR Message without a trial id', async () => {
     _.set(message, 'entry[1].resource.parameter[0]', undefined);
-    await assertStatus(message, 400);
-    await assertNum(0);
-  });
-
-  it('should not post a FHIR Message without a MRN', async () => {
-    _.set(message, 'entry[2].resource.identifier[1]', undefined);
     await assertStatus(message, 400);
     await assertNum(0);
   });
