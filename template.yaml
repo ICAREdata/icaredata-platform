@@ -49,7 +49,7 @@ Resources:
   SmartConfigurationLambda:
     Type: "AWS::Serverless::Function"
     Properties:
-      Handler: auth/index.handler
+      Handler: bulkdata/index.handler
       Runtime: nodejs10.x
       Events:
         GetSmartConfiguration:
