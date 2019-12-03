@@ -46,4 +46,15 @@ Resources:
             RestApiId: !Ref ApiGateway
             Path: /metadata
             Method: get
-
+  SmartConfigurationLambda:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      Handler: bulkdata/index.handler
+      Runtime: nodejs10.x
+      Events:
+        GetSmartConfiguration:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /.well-known/smart-configuration
+            Method: get
