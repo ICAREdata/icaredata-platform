@@ -1,0 +1,13 @@
+version: '2'
+services:
+  database:
+    build:
+      context: database
+    networks:
+      - icaredata
+    ports:
+      - "5433:5432"
+    container_name: icd-pg
+networks:
+  icaredata:
+    driver: bridge
