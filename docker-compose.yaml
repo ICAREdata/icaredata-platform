@@ -8,6 +8,30 @@ services:
     ports:
       - "5433:5432"
     container_name: icd-pg
+  migration:
+    image: oryd/hydra:v1.0.8
+    networks: 
+      - icaredata
+    depends_on:
+      - database
+    command: migrate sql --yes postgres://postgres:docker@icd-pg/hydra?sslmode=disable
+  oauth:
+    image: oryd/hydra:v1.0.8
+    networks:
+      - icaredata
+    depends_on:
+      - migration
+    ports:
+      - 9000:4444
+      - 9001:4445
+    environment:
+      SECRETS_SYSTEM: testtesttesttest
+      DSN: postgres://postgres:docker@icd-pg/hydra?sslmode=disable
+      URLS_SELF_ISSUER: https://localhost:9000/
+      URLS_CONSENT: http://localhost:9020/consent
+      URLS_LOGIN: http://localhost:9020/login
+    container_name: ory-hydra
+    command: serve all
 networks:
   icaredata:
     driver: bridge
