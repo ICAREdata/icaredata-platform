@@ -1,5 +1,5 @@
-const {local} = require('./utils/knexfile.js');
-const responses = require('./utils/responses.js');
+const {local} = require('../utils/knexfile.js');
+const responses = require('../utils/responses.js');
 const knex = require('knex')(local);
 const fhirpath = require('fhirpath');
 

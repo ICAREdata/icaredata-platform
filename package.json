@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test --timeout 30000"
+    "test": "mocha test --timeout 30000",
+    "build-message": "mkdir terraform/build && zip -r terraform/build/process-message.zip process-message/ node_modules/",
+    "deploy": "(cd terraform && terraform init && terraform apply) << yes"
   },
   "author": "",
   "license": "ISC",
