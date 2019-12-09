@@ -5,8 +5,13 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha test --timeout 30000",
-    "build-message": "mkdir terraform/build && zip -r terraform/build/process-message.zip process-message/ node_modules/",
-    "deploy": "(cd terraform && terraform init && terraform apply) << yes"
+    "build-message": "mkdir -p terraform/build && zip -qr terraform/build/process-message.zip process-message/ node_modules/",
+    "build-conformance": "mkdir -p terraform/build && zip -qr terraform/build/conformance.zip conformance/",
+    "build-bulkdata": "mkdir -p terraform/build && zip -qr terraform/build/bulkdata.zip bulkdata/",
+    "build-all": "npm run-script build-message && npm run-script build-conformance && npm run-script build-bulkdata",
+    "clean": "rm -rf terraform/build",
+    "deploy": "(cd terraform && terraform init && terraform apply <<< yes)",
+    "build-deploy": "npm run-script build-all && npm run-script deploy"
   },
   "author": "",
   "license": "ISC",
