@@ -7,16 +7,16 @@ resource "aws_api_gateway_resource" "process_message" {
 resource "aws_api_gateway_method" "process_message" {
   rest_api_id   = aws_api_gateway_rest_api.gateway.id
   resource_id   = aws_api_gateway_resource.process_message.id
-  http_method   = "GET"
+  http_method   = "POST"
   authorization = "NONE"
 }
 
 resource "aws_lambda_function" "process_message" {
-  filename = "build/process-message.zip"
+  filename      = "build/process-message.zip"
   function_name = "ProcessMessage"
-  handler = "process-message/index.handler"
-  runtime = "nodejs10.x"
-  role = aws_iam_role.lambda_exec.arn
+  handler       = "process-message/index.handler"
+  runtime       = "nodejs10.x"
+  role          = aws_iam_role.lambda_exec.arn
 }
 
 resource "aws_api_gateway_integration" "process_message" {
@@ -25,12 +25,13 @@ resource "aws_api_gateway_integration" "process_message" {
   http_method = aws_api_gateway_method.process_message.http_method
 
   integration_http_method = "POST"
-  type = "AWS_PROXY"
-  uri = aws_lambda_function.process_message.invoke_arn
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.process_message.invoke_arn
 }
 
 resource "aws_api_gateway_deployment" "process_message" {
   depends_on = [
+    aws_api_gateway_method.process_message,
     aws_api_gateway_integration.process_message
   ]
 
@@ -38,12 +39,12 @@ resource "aws_api_gateway_deployment" "process_message" {
   stage_name  = "dev"
 }
 
-output "base_url" {
+output "process_message_url" {
   value = "${aws_api_gateway_deployment.process_message.invoke_url}/${aws_api_gateway_resource.process_message.path_part}"
 }
 
-resource "aws_lambda_permission" "apigw" {
-  statement_id  = "AllowAPIGatewayInvoke"
+resource "aws_lambda_permission" "process_message" {
+  statement_id  = "AllowAPIGatewayInvokeProcessMessage"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.process_message.function_name
   principal     = "apigateway.amazonaws.com"
