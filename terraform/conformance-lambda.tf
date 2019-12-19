@@ -21,7 +21,7 @@ resource "aws_lambda_function" "conformance" {
 
 resource "aws_api_gateway_integration" "conformance" {
   rest_api_id = aws_api_gateway_rest_api.gateway.id
-  resource_id = aws_api_gateway_method.conformance.resource_id
+  resource_id = aws_api_gateway_resource.conformance.id
   http_method = aws_api_gateway_method.conformance.http_method
 
   integration_http_method = "POST"
