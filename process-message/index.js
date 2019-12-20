@@ -1,28 +1,56 @@
-const {local} = require('../utils/knexfile.js');
+'use strict';
+
+const AWS = require('aws-sdk');
+
+const {production} = require('../utils/knexfile.js');
 const responses = require('../utils/responses.js');
-const knex = require('knex')(local);
 const fhirpath = require('fhirpath');
+const fs = require('fs');
 
 exports.handler = async (event) => {
+  const signer = new AWS.RDS.Signer();
+  await new Promise((resolve, reject) => {
+    signer.getAuthToken({
+      region: 'us-east-2',
+      hostname: 'database-2.carn3hm0atrn.us-east-2.rds.amazonaws.com',
+      port: 5432,
+      username: 'lambda',
+    }, (err, token) => {
+      if (err) {
+        console.log(`could not get auth token: ${err}`);
+        reject(err);
+      } else {
+        production.connection.password = token;
+        resolve(token);
+      }
+    });
+  });
+
+  if (!production.connection.password) return responses.response500;
+  production.connection.ssl = {
+    ca: fs.readFileSync(__dirname + '/../utils/rds-ca-2019-root.pem'),
+  };
+
+  const knex = require('knex')(production);
+
   // First, verify that this is a message
   const message = JSON.parse(event.body);
 
   const isMessage =
-      (fhirpath.evaluate(message, 'Bundle.type')[0] === 'message');
+    (fhirpath.evaluate(message, 'Bundle.type')[0] === 'message');
 
   if (!isMessage) return responses.response400;
-
 
   // Collect the MessageHeader, Parameters, and Patient resources
   // from within the Message
   const messageHeader =
-      getBundleResourcesByType(message, 'MessageHeader', {}, true);
+    getBundleResourcesByType(message, 'MessageHeader', {}, true);
 
   const parameters =
-      getBundleResourcesByType(message, 'Parameters', {}, true);
+    getBundleResourcesByType(message, 'Parameters', {}, true);
 
   const patient =
-      getBundleResourcesByType(message, 'Patient', {}, true);
+    getBundleResourcesByType(message, 'Patient', {}, true);
 
   if (!(messageHeader && parameters && patient)) return responses.response400;
 
@@ -57,7 +85,6 @@ exports.handler = async (event) => {
 
   if (!hasInfo) return responses.response400;
 
-
   // Now that we've collected the data, format it so we can put in the database
   const data = {
     site_id: clinicalTrialSite,
@@ -77,18 +104,20 @@ exports.handler = async (event) => {
         // Set the appropriate positive response parameters and send
         const response200 = responses.response200;
         response200.body.entry[0].resource.response.identifier = bundleId;
-        response200.body.entry[0].resource.timestamp = new Date().toISOString();
+        response200.body.entry[0].resource.timestamp =
+          new Date().toISOString();
         response200.body = JSON.stringify(response200.body);
         return response200;
       })
       .catch((e) => {
+        console.log(e);
         return responses.response500;
       });
 };
 
 // Utility function to get the resources of a type from our message bundle
 // Optionally get only the first resource of that type via 'first' parameter
-getBundleResourcesByType = (message, type, context = {}, first) => {
+const getBundleResourcesByType = (message, type, context = {}, first) => {
   const resources = fhirpath.evaluate(
       message,
       `Bundle.entry.where(resource.resourceType='${type}').resource`,
