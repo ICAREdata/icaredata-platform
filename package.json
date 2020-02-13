@@ -21,7 +21,9 @@
     "aws-sdk": "^2.594.0",
     "fhirpath": "^0.17.4",
     "fs": "0.0.1-security",
-    "knex": "^0.19.5"
+    "knex": "^0.19.5",
+    "lodash": "^4.17.15",
+    "pg": "^7.18.1"
   },
   "devDependencies": {
     "axios": "^0.19.0",
