@@ -16,64 +16,51 @@ exports.handler = async (event) => {
 
   const knex = require('knex')(production);
 
-  // First, verify that this is valid R4
   const ajv = new Ajv({logger: false});
   ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'));
   const valid = ajv.addSchema(schema, 'FHIR').validate('FHIR', event);
-
   // TODO: Return an error if message is invalid, once we have valid
   // FHIR R4 messages to use for testing
-  console.log(`Valid: ${valid}`);
+  console.log(`Validity of Bundle against FHIR R4: ${valid}.`);
 
-  // Next, verify that this is a message
   const isMessage =
     (fhirpath.evaluate(event, 'Bundle.type')[0] === 'message');
-
   if (!isMessage) return responses.response400;
+  console.log('Verified Bundle is a Message.');
 
-  // Collect the MessageHeader, Parameters, and Patient resources
-  // from within the Message
   const messageHeader =
     getBundleResourcesByType(event, 'MessageHeader', {}, true);
-
   const parameters =
     getBundleResourcesByType(event, 'Parameters', {}, true);
-
   const patient =
     getBundleResourcesByType(event, 'Patient', {}, true);
-
   if (!(messageHeader && parameters && patient)) return responses.response400;
-
+  console.log('Collected MessageHeader, Parameters, and Patient.');
 
   // Collect all information that we want to store in the database
   // from the MessageHeader, Parameters, and Patient resources
   const bundleId = fhirpath.evaluate(event, 'Bundle.id')[0];
-
   // TODO: Might want some sort of timestamp field from the Bundle eventually
   const timestamp = fhirpath.evaluate(
       messageHeader,
       'MessageHeader.timestamp',
   )[0];
-
   const clinicalTrialSite = fhirpath.evaluate(
       parameters,
       'Parameters.parameter.where(name = \'clinicalTrialSite\').valueString',
   )[0];
-
   const clinicalTrialId = fhirpath.evaluate(
       parameters,
       'Parameters.parameter.where(name = \'clinicalTrialId\').valueString',
   )[0];
-
   const medicalRecordNumber = fhirpath.evaluate(
       patient,
       'Patient.identifier.where(type.coding.code=\'MR\').value',
   )[0];
-
   const hasInfo = (bundleId && timestamp && clinicalTrialSite &&
     clinicalTrialId && medicalRecordNumber);
-
   if (!hasInfo) return responses.response400;
+  console.log('Collected relevant data from Message resources.');
 
   // Now that we've collected the data, format it so we can put in the database
   const info = {
@@ -85,6 +72,7 @@ exports.handler = async (event) => {
     bundle: event,
   };
 
+  console.log('Inserting Message data into the database.');
   // Finally, try to insert the data into the database
   const response = await knex
       .insert([info])
@@ -96,15 +84,14 @@ exports.handler = async (event) => {
         response200.body.entry[0].resource.timestamp =
           new Date().toISOString();
         response200.body = JSON.stringify(response200.body);
+        console.log('Data inserted into database.');
         return response200;
       })
       .catch((e) => {
         console.log(e);
         return responses.response500;
       });
-
   knex.destroy();
-
   return response;
 };
 
