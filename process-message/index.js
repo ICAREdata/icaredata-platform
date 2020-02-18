@@ -2,8 +2,10 @@
 
 const {production} = require('../utils/knexfile.js');
 const responses = require('../utils/responses.js');
+const schema = require('../utils/fhir.schema.json');
 const fhirpath = require('fhirpath');
 const fs = require('fs');
+const Ajv = require('ajv');
 const cloneDeep = require('lodash/cloneDeep');
 
 exports.handler = async (event) => {
@@ -14,7 +16,16 @@ exports.handler = async (event) => {
 
   const knex = require('knex')(production);
 
-  // First, verify that this is a message
+  // First, verify that this is valid R4
+  const ajv = new Ajv({logger: false});
+  ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'));
+  const valid = ajv.addSchema(schema, 'FHIR').validate('FHIR', event);
+
+  // TODO: Return an error if message is invalid, once we have valid
+  // FHIR R4 messages to use for testing
+  console.log(`Valid: ${valid}`);
+
+  // Next, verify that this is a message
   const isMessage =
     (fhirpath.evaluate(event, 'Bundle.type')[0] === 'message');
 
