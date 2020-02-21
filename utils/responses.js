@@ -1,7 +1,7 @@
 module.exports = {
   response200: {
     statusCode: 200,
-    body: { // Need to JSON.stringify later after we mutate it
+    body: JSON.stringify({
       resourceType: 'Bundle',
       id: 'ok',
       type: 'message',
@@ -14,33 +14,36 @@ module.exports = {
               code: 'ICAREdataReport',
               display: 'ICAREdata report',
             },
-            response: {
-              code: 'ok',
+            source: {
+              name: 'ICAREdata',
+              endpoint: 'icaredata.org/$process-message', // Is this correct?
             },
           },
         },
       ],
-    },
-  },
-  response400: {
-    statusCode: 400,
-    body: JSON.stringify({
-      resourceType: 'OperationOutcome',
-      id: 'error',
-      text: {
-        status: 'additional',
-        div: '<div>\n      <p>Error processing FHIR Message</p>\n    </div>',
-      },
-      issue: [
-        {
-          severity: 'error',
-          code: 'exception',
-          details: {
-            text: 'Error processing FHIR Message',
-          },
-        },
-      ],
     }),
+  },
+  response400: (errorMessage) => { // Takes a message argument
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        resourceType: 'OperationOutcome',
+        id: 'error',
+        text: {
+          status: 'additional',
+          div: `<div>\n      <p>${errorMessage}</p>\n    </div>`,
+        },
+        issue: [
+          {
+            severity: 'error',
+            code: 'exception',
+            details: {
+              text: errorMessage,
+            },
+          },
+        ],
+      }),
+    };
   },
   response500: {
     statusCode: 500,

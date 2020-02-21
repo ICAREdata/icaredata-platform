@@ -6,7 +6,6 @@ const schema = require('../utils/fhir.schema.json');
 const fhirpath = require('fhirpath');
 const fs = require('fs');
 const Ajv = require('ajv');
-const cloneDeep = require('lodash/cloneDeep');
 
 exports.handler = async (event) => {
   production.connection.ssl = {
@@ -21,11 +20,20 @@ exports.handler = async (event) => {
   const valid = ajv.addSchema(schema, 'FHIR').validate('FHIR', event);
   // TODO: Return an error if message is invalid, once we have valid
   // FHIR R4 messages to use for testing
+  // if (!valid) {
+  //   return responses.response400(
+  //       'Request body is not a valid FHIR R4 Bundle.',
+  //   );
+  // }
   console.log(`Validity of Bundle against FHIR R4: ${valid}.`);
 
   const isMessage =
     (fhirpath.evaluate(event, 'Bundle.type')[0] === 'message');
-  if (!isMessage) return responses.response400;
+  if (!isMessage) {
+    return responses.response400(
+        'FHIR Bundle is not a Message.',
+    );
+  }
   console.log('Verified Bundle is a Message.');
 
   const messageHeader =
@@ -34,7 +42,11 @@ exports.handler = async (event) => {
     getBundleResourcesByType(event, 'Parameters', {}, true);
   const patient =
     getBundleResourcesByType(event, 'Patient', {}, true);
-  if (!(messageHeader && parameters && patient)) return responses.response400;
+  if (!(messageHeader && parameters && patient)) {
+    return responses.response400(
+        'Message does not have all required resources.',
+    );
+  }
   console.log('Collected MessageHeader, Parameters, and Patient.');
 
   // Collect all information that we want to store in the database
@@ -59,7 +71,11 @@ exports.handler = async (event) => {
   )[0];
   const hasInfo = (bundleId && timestamp && clinicalTrialSite &&
     clinicalTrialId && medicalRecordNumber);
-  if (!hasInfo) return responses.response400;
+  if (!hasInfo) {
+    return responses.response400(
+        'Message resources do not contain all required data.',
+    );
+  };
   console.log('Collected relevant data from Message resources.');
 
   // Now that we've collected the data, format it so we can put in the database
@@ -78,18 +94,32 @@ exports.handler = async (event) => {
       .insert([info])
       .into('messages')
       .then((r) => {
-        // Set the appropriate positive response parameters and send
-        const response200 = cloneDeep(responses.response200);
-        response200.body.entry[0].resource.response.identifier = bundleId;
-        response200.body.entry[0].resource.timestamp =
-          new Date().toISOString();
-        response200.body = JSON.stringify(response200.body);
         console.log('Data inserted into database.');
-        return response200;
+        return responses.response200;
       })
       .catch((e) => {
         console.log(e);
-        return responses.response500;
+        // The below link describes error codes for PostgreSQL
+        // https://www.postgresql.org/docs/9.6/errcodes-appendix.html
+
+        if (e.code.startsWith('23')) {
+          // Throw a 400 error for any integrity constraint violation (Class 23)
+          const violationMap = {
+            '23000': 'Integrity Constraint Violation',
+            '23001': 'Restrict Violation',
+            '23502': 'Not Null Violation',
+            '23503': 'Foreign Key Violation',
+            '23505': 'Unique Violation',
+            '23514': 'Check Violation',
+            '23P01': 'Exclusion Violation',
+          };
+          const violation =
+            violationMap[e.code] || 'Integrity Constraint Violation';
+          return responses.response400(violation);
+        } else {
+          // Throw a 500 Internal Server Error for any other error
+          return responses.response500;
+        }
       });
   knex.destroy();
   return response;
