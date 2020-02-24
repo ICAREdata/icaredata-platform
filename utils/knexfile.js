@@ -1,4 +1,14 @@
 module.exports = {
+  production: {
+    client: 'pg',
+    connection: {
+      host: 'database.cstgmm6byetb.us-east-1.rds.amazonaws.com',
+      port: 5432,
+      user: process.env.DbUser,
+      password: process.env.DbPwd,
+      database: 'icare',
+    },
+  },
   local: {
     client: 'pg',
     connection: {
@@ -6,7 +16,7 @@ module.exports = {
       port: 5433,
       user: process.env.DbUser,
       password: process.env.DbPwd,
-      database: 'dev',
+      database: 'icare',
     },
   },
   testing: {
@@ -16,7 +26,7 @@ module.exports = {
       port: 5433,
       user: process.env.DbUser, // Must set on local system
       password: process.env.DbPwd, // Must set on local system
-      database: 'dev',
+      database: 'icare',
     },
   },
 };

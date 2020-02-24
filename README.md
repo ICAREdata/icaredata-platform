@@ -1,14 +1,16 @@
 # Local Dev Setup
 
-## Install SAM, Docker, Docker Compose, and Node
+## Install Dependencies
 
-[source](https://hackernoon.com/dont-install-postgres-docker-pull-postgres-bee20e200198)
+[localstack](https://github.com/localstack/localstack)
 
-[Install SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install-mac.html). In the process, you will install docker as well.
+Terraform (e.g. `brew install terraform`). I wouldn't recommend installing through binaries like their website recommends. Use a package manager if possible.
 
-[Install Docker Compose](https://docs.docker.com/compose/install/)
+[Docker](https://docs.docker.com/v17.09/docker-for-mac/install/)
 
-[Install node/npm/npx through nvm](https://github.com/nvm-sh/nvm)
+[Docker Compose](https://docs.docker.com/compose/install/)
+
+[node/npm/npx e.g. through nvm](https://github.com/nvm-sh/nvm)
 
 ## Set up ORY Hydra and the Postgres server
 
@@ -47,10 +49,25 @@ sam local start-api --parameter-overrides 'ParameterKey=DbUser,ParameterValue=po
 
 You should be able to send a post request to http://127.0.0.1:3000/DSTU2/$process-message with a properly formatted FHIR Message in the body. An example of such a FHIR Message Bundle is included in `test/fixtures/messaging/message.json`. This will insert the Message and its associated information into the database.
 
-## Run the Test Client
+## Run the Test Suite
 
-In order to run the FHIR Messaging tests successfully, you must set environment variables in your system for `DbUser` and `DbPwd` correctly configured to your username and password for the database.
+In order to run the FHIR Messaging tests successfully, you must set environment variables in your system for `DbUser` and `DbPwd` correctly configured to your username and password for the database (in our local setup, these are just the values above, postgres and docker respectively).
 
 ```bash
 npm test
+```
+
+# Deploying to AWS
+
+Note your access key and secret for your user on your AWS account. See [here](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html) for more information.
+
+[Install the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-macOS.html).
+
+```bash
+aws configure
+# Fill in your access key and secret
+# AWS Access Key ID [None]: ********************
+# AWS Secret Access Key [None]: ********************
+# Default region name [None]: us-east-2
+# Default output format [None]: json
 ```

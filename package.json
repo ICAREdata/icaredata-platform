@@ -4,14 +4,27 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test --timeout 30000"
+    "test": "mocha test --timeout 30000",
+    "clean": "rm -rf terraform/build && (cd terraform && terraform destroy <<< yes)",
+    "build-message": "mkdir -p terraform/build && zip -qr terraform/build/process-message.zip process-message/ node_modules/ utils/",
+    "build-conformance": "mkdir -p terraform/build && zip -qr terraform/build/conformance.zip conformance/",
+    "build-bulkdata": "mkdir -p terraform/build && zip -qr terraform/build/bulkdata.zip bulkdata/",
+    "build-all": "npm run build-message && npm run build-conformance && npm run build-bulkdata",
+    "clean-build": "npm run clean && npm run build-all",
+    "deploy": "(cd terraform && terraform init && terraform apply <<< yes)",
+    "build-deploy": "npm run build-all && npm run deploy",
+    "clean-deploy": "npm run clean && npm run build-deploy"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "ajv": "^6.11.0",
+    "aws-sdk": "^2.594.0",
     "fhirpath": "^0.17.4",
+    "fs": "0.0.1-security",
     "knex": "^0.19.5",
-    "pg": "^7.12.1"
+    "lodash": "^4.17.15",
+    "pg": "^7.18.1"
   },
   "devDependencies": {
     "axios": "^0.19.0",
