@@ -1,5 +1,4 @@
-'use strict';
-
+const {getSecret} = require('../utils/getSecret.js');
 const {production} = require('../utils/knexfile.js');
 const responses = require('../utils/responses.js');
 const schema = require('../utils/fhir.schema.json');
@@ -8,6 +7,9 @@ const fs = require('fs');
 const Ajv = require('ajv');
 
 exports.handler = async (event) => {
+  const secret = await getSecret('Lambda-RDS-Login');
+  production.connection.user = secret.username;
+  production.connection.password = secret.password;
   production.connection.ssl = {
     rejectUnauthorized: true,
     ca: fs.readFileSync(__dirname + '/../utils/rds-ca-2019-root.pem'),
@@ -17,15 +19,14 @@ exports.handler = async (event) => {
 
   const ajv = new Ajv({logger: false});
   ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'));
+
   const valid = ajv.addSchema(schema, 'FHIR').validate('FHIR', event);
-  // TODO: Return an error if message is invalid, once we have valid
-  // FHIR R4 messages to use for testing
-  // if (!valid) {
-  //   return responses.response400(
-  //       'Request body is not a valid FHIR R4 Bundle.',
-  //   );
-  // }
-  console.log(`Validity of Bundle against FHIR R4: ${valid}.`);
+  if (!valid) {
+    return responses.response400(
+        'Request body is not a valid FHIR R4 Bundle.',
+    );
+  }
+  console.log(`Bundle is valid FHIR R4.`);
 
   const isMessage =
     (fhirpath.evaluate(event, 'Bundle.type')[0] === 'message');
@@ -38,19 +39,23 @@ exports.handler = async (event) => {
 
   const messageHeader =
     getBundleResourcesByType(event, 'MessageHeader', {}, true);
-  const parameters =
-    getBundleResourcesByType(event, 'Parameters', {}, true);
-  const patient =
-    getBundleResourcesByType(event, 'Patient', {}, true);
-  if (!(messageHeader && parameters && patient)) {
+  if (!messageHeader) {
     return responses.response400(
-        'Message does not have all required resources.',
+        'Message does not contain MessageHeader.',
     );
   }
-  console.log('Collected MessageHeader, Parameters, and Patient.');
+
+  const bundle =
+    getBundleResourcesByType(event, 'Bundle', {}, true);
+  if (!messageHeader) {
+    return responses.response400(
+        'Message does not contain Bundle.',
+    );
+  }
+  console.log('Collected MessageHeader and Bundle.');
 
   // Collect all information that we want to store in the database
-  // from the MessageHeader, Parameters, and Patient resources
+  // from the MessageHeader and Bundle resources
   const bundleId = fhirpath.evaluate(event, 'Bundle.id')[0];
   // TODO: Might want some sort of timestamp field from the Bundle eventually
   const timestamp = fhirpath.evaluate(
