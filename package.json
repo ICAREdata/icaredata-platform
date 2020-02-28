@@ -9,7 +9,7 @@
     "build-conformance": "mkdir -p terraform/build && zip -qr terraform/build/conformance.zip conformance/",
     "build-bulkdata": "mkdir -p terraform/build && zip -qr terraform/build/bulkdata.zip bulkdata/",
     "build-extraction": "mkdir -p terraform/build && zip -qr terraform/build/extraction.zip extraction/ node_modules/ utils/",
-    "build-authorizer": "mkdir -p terraform/build && zip -qr terraform/build/authorizer.zip authorizer/",
+    "build-authorizer": "mkdir -p terraform/build && zip -qr terraform/build/authorizer.zip authorizer/ utils/",
     "build-proxy": "mkdir -p terraform/build && zip -qr terraform/build/proxy.zip proxy/",
     "build-all": "npm run build-message && npm run build-conformance && npm run build-bulkdata && npm run build-extraction && npm run build-authorizer && npm run build-proxy"
   },

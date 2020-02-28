@@ -1,9 +1,13 @@
 const https = require('https');
+const {getSecret} = require('../utils/getSecret.js');
 
 // TODO: remove this and get the server a proper certificate
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 exports.handler = async (event) => {
+  const secret = await getSecret('Keycloak-Authorizer');
+  const authHeader =
+    Buffer.from(`${secret.username}:${secret.password}`).toString('base64');
   const options = {
     hostname: process.env.OAUTH_SERVER_HOST,
     port: process.env.OAUTH_SERVER_PORT,
@@ -11,7 +15,7 @@ exports.handler = async (event) => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': process.env.AUTHORIZATION_HEADER,
+      'Authorization': `Basic ${authHeader}`,
     },
   };
 
