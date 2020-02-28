@@ -4,8 +4,6 @@ module.exports = {
     connection: {
       host: 'database.cstgmm6byetb.us-east-1.rds.amazonaws.com',
       port: 5432,
-      user: process.env.DbUser,
-      password: process.env.DbPwd,
       database: 'icare',
     },
   },

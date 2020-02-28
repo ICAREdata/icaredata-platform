@@ -5,15 +5,13 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha test --timeout 30000",
-    "clean": "rm -rf terraform/build && (cd terraform && terraform destroy <<< yes)",
     "build-message": "mkdir -p terraform/build && zip -qr terraform/build/process-message.zip process-message/ node_modules/ utils/",
     "build-conformance": "mkdir -p terraform/build && zip -qr terraform/build/conformance.zip conformance/",
     "build-bulkdata": "mkdir -p terraform/build && zip -qr terraform/build/bulkdata.zip bulkdata/",
-    "build-all": "npm run build-message && npm run build-conformance && npm run build-bulkdata",
-    "clean-build": "npm run clean && npm run build-all",
-    "deploy": "(cd terraform && terraform init && terraform apply <<< yes)",
-    "build-deploy": "npm run build-all && npm run deploy",
-    "clean-deploy": "npm run clean && npm run build-deploy"
+    "build-extraction": "mkdir -p terraform/build && zip -qr terraform/build/extraction.zip extraction/ node_modules/ utils/",
+    "build-authorizer": "mkdir -p terraform/build && zip -qr terraform/build/authorizer.zip authorizer/",
+    "build-proxy": "mkdir -p terraform/build && zip -qr terraform/build/proxy.zip proxy/",
+    "build-all": "npm run build-message && npm run build-conformance && npm run build-bulkdata && npm run build-extraction && npm run build-authorizer && npm run build-proxy"
   },
   "author": "",
   "license": "ISC",
