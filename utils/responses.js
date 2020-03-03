@@ -16,7 +16,7 @@ module.exports = {
             },
             source: {
               name: 'ICAREdata',
-              endpoint: 'icaredata.org/$process-message', // Is this correct?
+              endpoint: 'https://testing.icaredata.org/$process-message',
             },
           },
         },
