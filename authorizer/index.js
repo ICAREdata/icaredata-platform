@@ -1,5 +1,5 @@
 const https = require('https');
-const querystring = require("querystring");
+const querystring = require('querystring');
 const {getSecret} = require('../utils/getSecret.js');
 
 // TODO: remove this and get the server a proper certificate
@@ -17,7 +17,7 @@ exports.handler = async (event) => {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
       'Authorization': `Basic ${authHeader}`,
-      'X-Forwarded-Host': 'testing.icaredata.org'
+      'X-Forwarded-Host': 'testing.icaredata.org',
     },
   };
 
@@ -47,16 +47,18 @@ exports.handler = async (event) => {
         reject(new Error('Invalid token'));
       });
     });
-     let post = querystring.stringify({token:formatToken(event.authorizationToken),
-                            token_type_hint: "requesting_party_token"})
+    const post = querystring.stringify({
+      token: formatToken(event.authorizationToken),
+      token_type_hint: 'requesting_party_token',
+    });
     req.write(post);
     req.end();
   });
 };
 
 const formatToken = (token) =>{
-  return token.replace("Bearer ", '')
-}
+  return token.replace('Bearer ', '');
+};
 
 // Help function to generate an IAM policy
 const generatePolicy = (principalId, effect, resource) => {
