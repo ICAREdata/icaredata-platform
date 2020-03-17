@@ -17,6 +17,8 @@
   "license": "ISC",
   "dependencies": {
     "ajv": "^6.11.0",
+    "archiver": "^3.1.1",
+    "archiver-zip-encrypted": "^1.0.8",
     "aws-sdk": "^2.594.0",
     "exceljs": "^3.8.1",
     "fhirpath": "^0.17.4",

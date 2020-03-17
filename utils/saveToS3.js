@@ -6,7 +6,7 @@ module.exports = {
     await s3.upload({
       Body: data,
       Bucket: bucket,
-      Key: 's3-upload.xlsx',
+      Key: `icare-${Date.now()}.zip`,
     }).promise();
     return;
   },
