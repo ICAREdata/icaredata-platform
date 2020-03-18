@@ -44,38 +44,46 @@ exports.handler = async (event) => {
         'Message does not contain MessageHeader.',
     );
   }
-
-  const bundle =
-    getBundleResourcesByType(event, 'Bundle', {}, true);
-  if (!messageHeader) {
+  const bundle = getBundleResourcesByType(event, 'Bundle', {}, true);
+  if (!bundle) {
     return responses.response400(
         'Message does not contain Bundle.',
     );
   }
   console.log('Collected MessageHeader and Bundle.');
 
+  const researchSubject =
+    getBundleResourcesByType(bundle, 'ResearchSubject', {}, true);
+  if (!researchSubject) {
+    return responses.response400(
+        'Bundle does not contain ResearchSubject.',
+    );
+  }
+  const researchStudy =
+    getBundleResourcesByType(bundle, 'ResearchStudy', {}, true);
+  if (!researchStudy) {
+    return responses.response400(
+        'Bundle does not contain ResearchStudy.',
+    );
+  }
+  console.log('Collected ResearchSubject and ResearchStudy.');
+
   // Collect all information that we want to store in the database
-  // from the MessageHeader and Bundle resources
+  // from the resources
   const bundleId = fhirpath.evaluate(event, 'Bundle.id')[0];
-  // TODO: Might want some sort of timestamp field from the Bundle eventually
-  const timestamp = fhirpath.evaluate(
+  const subjectId = fhirpath.evaluate(
+      researchSubject,
+      'ResearchSubject.identifier.first().value',
+  )[0];
+  const siteId = fhirpath.evaluate(
       messageHeader,
-      'MessageHeader.timestamp',
+      'MessageHeader.source.endpoint',
   )[0];
-  const clinicalTrialSite = fhirpath.evaluate(
-      parameters,
-      'Parameters.parameter.where(name = \'clinicalTrialSite\').valueString',
+  const trialId = fhirpath.evaluate(
+      researchStudy,
+      'ResearchStudy.identifier.first().value',
   )[0];
-  const clinicalTrialId = fhirpath.evaluate(
-      parameters,
-      'Parameters.parameter.where(name = \'clinicalTrialId\').valueString',
-  )[0];
-  const medicalRecordNumber = fhirpath.evaluate(
-      patient,
-      'Patient.identifier.where(type.coding.code=\'MR\').value',
-  )[0];
-  const hasInfo = (bundleId && timestamp && clinicalTrialSite &&
-    clinicalTrialId && medicalRecordNumber);
+  const hasInfo = (bundleId && subjectId && trialId); // siteId not required
   if (!hasInfo) {
     return responses.response400(
         'Message resources do not contain all required data.',
@@ -85,11 +93,10 @@ exports.handler = async (event) => {
 
   // Now that we've collected the data, format it so we can put in the database
   const info = {
-    site_id: clinicalTrialSite,
-    trial_id: clinicalTrialId,
-    mrn: medicalRecordNumber,
-    capture_time: timestamp,
     bundle_id: bundleId,
+    subject_id: subjectId,
+    site_id: siteId,
+    trial_id: trialId,
     bundle: event,
   };
 
@@ -97,7 +104,7 @@ exports.handler = async (event) => {
   // Finally, try to insert the data into the database
   const response = await knex
       .insert([info])
-      .into('messages')
+      .into('data.messages')
       .then((r) => {
         console.log('Data inserted into database.');
         return responses.response200;
