@@ -12,13 +12,13 @@ describe('FHIR Messaging endpoint', async () => {
   let message;
 
   const apiGateway = axios.create({
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://testing.icaredata.org',
     timeout: 30000,
   });
 
   const assertStatus = async (msg, expectedStatus) => {
     const resp = await apiGateway.post(
-        '/DSTU2/$process-message',
+        '/$process-message',
         msg)
         .then((r) => r)
         .catch((e) => e.response);

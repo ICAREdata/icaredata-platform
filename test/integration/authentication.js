@@ -11,12 +11,12 @@ describe('OAuth server token endpoint', async () => {
   });
   const hydraAdmin = axios.create({
     httpsAgent,
-    baseURL: 'https://localhost:9001',
+    baseURL: 'https://testing.icaredata.org',
     headers: {'Accept': 'application/json'},
   });
   const hydraPublic = axios.create({
     httpsAgent,
-    baseURL: 'https://localhost:9000',
+    baseURL: 'https://testing.icaredata.org',
     headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -36,7 +36,7 @@ describe('OAuth server token endpoint', async () => {
   const getToken = async ({alg, kid2, typ, iss, sub, aud, exp, jti,
     signature, assertionType, grantType, scope} = {}) => {
     const private = signature || keystore.get(kid).toJSON(true);
-    const tokenEndpoint = '/oauth2/token';
+    const tokenEndpoint = '/oauth/token';
     const options = {
       compact: true,
       alg: alg || 'RS256',

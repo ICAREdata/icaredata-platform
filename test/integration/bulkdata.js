@@ -5,7 +5,7 @@ const axios = require('axios');
 const statement = require('../../bulkdata/statement.json');
 
 describe('SMART Configuration endpoint', async () => {
-  const apiGateway = axios.create({baseURL: 'http://localhost:3000'});
+  const apiGateway = axios.create({baseURL: 'https://testing.icaredata.org'});
 
   it('should return a valid SMART configuration statement', async () => {
     const resp = await apiGateway.get('/.well-known/smart-configuration')
