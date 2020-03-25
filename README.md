@@ -31,7 +31,7 @@ Finally, install Terraform, an automated build and deployment tool for AWS resou
 To run the test suite for this repository, run the following command.
 
 ```bash
-npm test
+yarn test
 ```
 
 ## Deploying to AWS
