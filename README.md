@@ -20,6 +20,10 @@ brew install yarn
 
 After installing these, `yarn` can be used to install all required dependencies for the code in this repository.
 
+```bash
+yarn install
+```
+
 Finally, install Terraform, an automated build and deployment tool for AWS resources.
 
 `brew install terraform`
