@@ -1,10 +1,6 @@
-
 # Local Dev Setup
 
-The `icaredata-platform` repository contains the code for the AWS Lambda functions for the
-
-ICAREdata infrastructure.
-
+The `icaredata-platform` repository contains the code for the AWS Lambda functions for the ICAREdata infrastructure.
 ## Install Dependencies  
 
 The following instructions assume a MacOS development setup.
