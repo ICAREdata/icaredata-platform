@@ -1,73 +1,51 @@
 # Local Dev Setup
 
-## Install Dependencies
+The `icaredata-platform` repository contains the code for the AWS Lambda functions for the ICAREdata infrastructure.
+## Install Dependencies  
 
-[localstack](https://github.com/localstack/localstack)
+The following instructions assume a MacOS development setup.
 
-Terraform (e.g. `brew install terraform`). I wouldn't recommend installing through binaries like their website recommends. Use a package manager if possible.
+Install the [Homebrew](https://brew.sh/) package manager.
 
-[Docker](https://docs.docker.com/v17.09/docker-for-mac/install/)
-
-[Docker Compose](https://docs.docker.com/compose/install/)
-
-[node/npm/npx e.g. through nvm](https://github.com/nvm-sh/nvm)
-
-## Set up ORY Hydra and the Postgres server
-
-Pull a docker image of hydra
+Use Homebrew in the command line to install `node` and `yarn`.
 
 ```bash
-docker pull oryd/hydra:v1.0.8
+brew install node
+brew install yarn
 ```
 
-Set up the services and network
-```bash
-docker-compose up -d # -d starts the services in the background
-```
-
-Check if the hydra server is running
+After installing these, `yarn` can be used to install all required dependencies for the code in this repository.
 
 ```bash
-docker logs ory-hydra
+yarn install
 ```
 
-## Postgres Client
+Finally, install Terraform, an automated build and deployment tool for AWS resources.
 
-Installing a postgres client is really only necessary in order to view and interact with the database directly. You can use any client you prefer, e.g. [pgAdmin](https://www.pgadmin.org/download/).
-
-If you do choose to use pgAdmin, once open, right click on servers and choose to create a server. Name the server (e.g. ICAREdata Local). In the connection tab, fill in localhost for the host and docker for the password. Connect to this server.
-
-## Start up the local AWS services
-
-Run `npm install`.
-
-You should have SAM installed from previous steps. Run
-
-```bash
-sam local start-api --parameter-overrides 'ParameterKey=DbUser,ParameterValue=postgres ParameterKey=DbPwd,ParameterValue=docker'
-```
-
-You should be able to send a post request to http://127.0.0.1:3000/DSTU2/$process-message with a properly formatted FHIR Message in the body. An example of such a FHIR Message Bundle is included in `test/fixtures/messaging/message.json`. This will insert the Message and its associated information into the database.
+`brew install terraform`
 
 ## Run the Test Suite
 
-In order to run the FHIR Messaging tests successfully, you must set environment variables in your system for `DbUser` and `DbPwd` correctly configured to your username and password for the database (in our local setup, these are just the values above, postgres and docker respectively).
+*NOTE* The test suite as currently implemented is outdated. There will be an updated test suite providing unit tests for the individual Lambda functions in the near future.
+
+To run the test suite for this repository, run the following command.
 
 ```bash
-npm test
+yarn test
 ```
 
-# Deploying to AWS
+## Deploying to AWS
 
-Note your access key and secret for your user on your AWS account. See [here](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html) for more information.
+Currently, the Terraform scripts are not configured for automatic deployment. The Lambda functions are manually deployed through the AWS console instead, by uploading a `.zip` file.
 
-[Install the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-macOS.html).
+In order to build the relevant .zip files to deploy the Lambda functions, the following commands are provided:
 
-```bash
-aws configure
-# Fill in your access key and secret
-# AWS Access Key ID [None]: ********************
-# AWS Secret Access Key [None]: ********************
-# Default region name [None]: us-east-2
-# Default output format [None]: json
-```
+Command | Effect
+--- | ---
+`npm run build-all` | Builds all Lambdas to a .zip file in the `terraform/build` directory.
+`npm run build-authorizer` | Builds Keycloak Authorizer Lambda to a .zip file in the `terraform/build` directory.
+`npm run build-bulkdata` | Builds SMART Configuration Lambda to a .zip file in the `terraform/build` directory.
+`npm run build-conformance` | Builds Conformance Lambda to a .zip file in the `terraform/build` directory.
+`npm run build-extraction` | Builds Data Extraction Lambda to a .zip file in the `terraform/build` directory.
+`npm run build-message` | Builds Process Message Lambda to a .zip file in the `terraform/build` directory.
+`npm run build-proxy` | Builds Keycloak Proxy Lambda to a .zip file in the `terraform/build` directory.
