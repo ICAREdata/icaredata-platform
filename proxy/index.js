@@ -1,8 +1,9 @@
 const https = require('https');
+const _ = require('lodash');
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const generateQueryUrl = (params) => {
-  if (!params) {
+  if (_.isEmpty(params)) {
     return process.env.OAUTH_SERVER_PATH;
   }
   return process.env.OAUTH_SERVER_PATH + '?' + Object.keys(params).map(
