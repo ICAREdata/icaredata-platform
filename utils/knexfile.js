@@ -7,16 +7,6 @@ module.exports = {
       database: 'icare',
     },
   },
-  local: {
-    client: 'pg',
-    connection: {
-      host: 'docker.for.mac.localhost',
-      port: 5433,
-      user: process.env.DbUser,
-      password: process.env.DbPwd,
-      database: 'icare',
-    },
-  },
   testing: {
     client: 'pg',
     connection: {
