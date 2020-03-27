@@ -1,10 +1,10 @@
-
 const {expect} = require('chai');
-const nock = require('nock');
+const {handler} = require('../../conformance');
 
 describe('Metadata', async () => {
-
-  xit('should work', async () => {
-    
+  it('Should return a FHIR conformance statement', async () => {
+    const response = await handler();
+    expect(response.resourceType).to.equal('Conformance');
+    expect(response.format).to.contain('application/json+fhir');
   });
 });
