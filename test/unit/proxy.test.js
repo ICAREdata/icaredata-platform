@@ -4,16 +4,8 @@ const rewire = require('rewire');
 const proxyModule = rewire('../../proxy');
 const {expect} = require('chai');
 
-describe('Proxy Handler', async () => {
-  it('should work', async () => {
-    const resp = await proxyModule.handler();
-    console.log('resp');
-    console.log(resp);
-  });
-});
-
 const generateQueryUrl = proxyModule.__get__('generateQueryUrl');
-describe('Proxy generateQueryUrl', async () => {
+describe('Proxy - generateQueryUrl', async () => {
   it('Should properly chain provided params ', async () => {
     const undefinedParams = undefined;
     const emptyParams = {};
