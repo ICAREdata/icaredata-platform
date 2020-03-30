@@ -6,7 +6,7 @@ const fhirpath = require('fhirpath');
 const fs = require('fs');
 const Ajv = require('ajv');
 
-exports.handler = async (event) => {
+exports.handler = async (event, context, callback) => {
   const secret = await getSecret('Lambda-RDS-Login');
   production.connection.user = secret.username;
   production.connection.password = secret.password;
@@ -22,49 +22,55 @@ exports.handler = async (event) => {
 
   const valid = ajv.addSchema(schema, 'FHIR').validate('FHIR', event);
   if (!valid) {
-    return responses.response400(
+    callback(responses.response400(
         'Request body is not a valid FHIR R4 Bundle.',
-    );
+    ));
+    return;
   }
   console.log(`Bundle is valid FHIR R4.`);
 
   const isMessage =
     (fhirpath.evaluate(event, 'Bundle.type')[0] === 'message');
   if (!isMessage) {
-    return responses.response400(
+    callback(responses.response400(
         'FHIR Bundle is not a Message.',
-    );
+    ));
+    return;
   }
   console.log('Verified Bundle is a Message.');
 
   const messageHeader =
     getBundleResourcesByType(event, 'MessageHeader', {}, true);
   if (!messageHeader) {
-    return responses.response400(
+    callback(responses.response400(
         'Message does not contain MessageHeader.',
-    );
+    ));
+    return;
   }
   const bundle = getBundleResourcesByType(event, 'Bundle', {}, true);
   if (!bundle) {
-    return responses.response400(
+    callback(responses.response400(
         'Message does not contain Bundle.',
-    );
+    ));
+    return;
   }
   console.log('Collected MessageHeader and Bundle.');
 
   const researchSubject =
     getBundleResourcesByType(bundle, 'ResearchSubject', {}, true);
   if (!researchSubject) {
-    return responses.response400(
+    callback(responses.response400(
         'Bundle does not contain ResearchSubject.',
-    );
+    ));
+    return;
   }
   const researchStudy =
     getBundleResourcesByType(bundle, 'ResearchStudy', {}, true);
   if (!researchStudy) {
-    return responses.response400(
+    callback(responses.response400(
         'Bundle does not contain ResearchStudy.',
-    );
+    ));
+    return;
   }
   console.log('Collected ResearchSubject and ResearchStudy.');
 
@@ -85,9 +91,10 @@ exports.handler = async (event) => {
   )[0];
   const hasInfo = (bundleId && subjectId && trialId); // siteId not required
   if (!hasInfo) {
-    return responses.response400(
+    callback(responses.response400(
         'Message resources do not contain all required data.',
-    );
+    ));
+    return;
   };
   console.log('Collected relevant data from Message resources.');
 
@@ -134,7 +141,11 @@ exports.handler = async (event) => {
         }
       });
   knex.destroy();
-  return response;
+
+  if (response === responses.response200) {
+    return response;
+  }
+  callback(response);
 };
 
 // Utility function to get the resources of a type from our message bundle
