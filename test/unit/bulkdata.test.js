@@ -1,7 +1,7 @@
 const {expect} = require('chai');
 const {handler} = require('../../bulkdata');
 
-describe('Bulkdata', async () => {
+describe('Bulkdata - handler', async () => {
   it('Should return a token-specification statement', async () => {
     const response = await handler();
     expect(response).to.have.property('token_endpoint');
