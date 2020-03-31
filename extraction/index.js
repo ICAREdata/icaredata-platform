@@ -2,11 +2,11 @@ const {getSecret} = require('../utils/getSecret.js');
 const {saveToS3} = require('../utils/saveToS3.js');
 const {production} = require('../utils/knexfile.js');
 const responses = require('../utils/responses.js');
+const {getBundleResourcesByType} = require('../utils/fhirUtils');
 const exceljs = require('exceljs');
 const Stream = require('stream');
 const fs = require('fs');
 const archiver = require('archiver');
-const fhirpath = require('fhirpath');
 archiver.registerFormat('zip-encrypted', require('archiver-zip-encrypted'));
 
 exports.handler = async () => {
@@ -40,7 +40,7 @@ exports.handler = async () => {
   treatmentPlanChangeWorksheet.columns = [
     {header: 'Effective Date', key: 'effectiveDate', width: 30},
     {header: 'Coded Value', key: 'codedValue', width: 30},
-    {header: 'Based On', key: 'basedOn', width: 30},
+    {header: 'Changed Flag', key: 'changedFlag', width: 30},
     {header: 'Subject ID', key: 'subjectId', width: 30},
     {header: 'Trial ID', key: 'trialId', width: 30},
     {header: 'Site ID', key: 'siteId', width: 30},
@@ -66,7 +66,7 @@ exports.handler = async () => {
               {},
               true,
           );
-          console.log('bundle: ', bundleEntry);
+
           // Get Disease Status resources and add relevant data to worksheet
           const dsResources = getBundleResourcesByType(
               bundleEntry,
@@ -74,9 +74,8 @@ exports.handler = async () => {
               {},
               false,
           );
-          console.log('dsResources: ', dsResources);
+
           dsResources.forEach((resource) => {
-            console.log('resource: ', resource);
             diseaseStatusWorksheet.addRow({
               effectiveDate: resource.effectiveDateTime,
               cancerType: resource.focus[0].reference,
@@ -88,6 +87,37 @@ exports.handler = async () => {
           });
 
           // Get CarePlan Resources and add data to worksheet
+          const carePlanResources = getBundleResourcesByType(
+              bundleEntry,
+              'CarePlan',
+              {},
+              false,
+          );
+
+          carePlanResources.forEach((resource) => {
+            const reviewDate = getExtensionByUrl(
+                resource.extension[0].extension,
+                'ReviewDate',
+            );
+            const effectiveDate = reviewDate ? reviewDate.valueDate : '';
+            const carePlanChangeReason = getExtensionByUrl(
+                resource.extension[0].extension,
+                'CarePlanChangedReason',
+            );
+            const changedFlag = getExtensionByUrl(
+                resource.extension[0].extension,
+                'ChangedFlag',
+            );
+
+            treatmentPlanChangeWorksheet.addRow({
+              effectiveDate,
+              codedValue: carePlanChangeReason.valueCodeableConcept,
+              changedFlag: changedFlag.valueBoolean,
+              subjectId: subjectId,
+              trialId: trialId,
+              siteId: siteId,
+            });
+          });
         });
 
         return await workbook.xlsx
@@ -119,18 +149,6 @@ exports.handler = async () => {
   return response;
 };
 
-// Utility function to get the resources of a type from our message bundle
-// Optionally get only the first resource of that type via 'first' parameter
-const getBundleResourcesByType = (message, type, context = {}, first) => {
-  const resources = fhirpath.evaluate(
-      message,
-      `Bundle.entry.where(resource.resourceType='${type}').resource`,
-      context,
-  );
-
-  if (resources.length > 0) {
-    return first ? resources[0] : resources;
-  } else {
-    return first ? null : [];
-  }
+const getExtensionByUrl = (extArr, url) => {
+  return extArr.find((e) => e.url === url);
 };
