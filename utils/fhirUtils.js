@@ -16,6 +16,12 @@ const getBundleResourcesByType = (message, type, context = {}, first) => {
   }
 };
 
+const getExtensionByUrl = (extArr, url) => {
+  return extArr.find((e) => e.url === url);
+};
+
 module.exports = {
   getBundleResourcesByType,
+  getExtensionByUrl,
+  hasProfile,
 };

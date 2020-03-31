@@ -2,7 +2,7 @@ const {getSecret} = require('../utils/getSecret.js');
 const {saveToS3} = require('../utils/saveToS3.js');
 const {production} = require('../utils/knexfile.js');
 const responses = require('../utils/responses.js');
-const {getBundleResourcesByType} = require('../utils/fhirUtils');
+const {getBundleResourcesByType, getExtensionByUrl} = require('../utils/fhirUtils');
 const exceljs = require('exceljs');
 const Stream = require('stream');
 const fs = require('fs');
@@ -152,8 +152,4 @@ exports.handler = async () => {
   knex.destroy();
 
   return response;
-};
-
-const getExtensionByUrl = (extArr, url) => {
-  return extArr.find((e) => e.url === url);
 };
