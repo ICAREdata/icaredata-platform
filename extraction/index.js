@@ -28,7 +28,7 @@ exports.handler = async () => {
     {header: 'Effective Date', key: 'effectiveDate', width: 30},
     {header: 'Cancer Type', key: 'cancerType', width: 30},
     {header: 'Coded Value', key: 'codedValue', width: 30},
-    {header: 'Based On', key: 'basedOn', width: 30},
+    {header: 'Evidence', key: 'evidence', width: 30},
     {header: 'Subject ID', key: 'subjectId', width: 30},
     {header: 'Trial ID', key: 'trialId', width: 30},
     {header: 'Site ID', key: 'siteId', width: 30},
@@ -76,18 +76,24 @@ exports.handler = async () => {
           );
 
           dsResources.forEach((resource) => {
-            const evidenceType = getExtensionByUrl(
+            const evidenceExtension = getExtensionByUrl(
                 resource.extension,
                 'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-evidence-type',
             );
+
+            // Joins the array of evidence items
+            const evidence = evidenceExtension ?
+            evidenceExtension.valueCodeableConcept.coding.map((c) => c.code).join(', ') :
+            '';
+
             diseaseStatusWorksheet.addRow({
+              evidence,
+              subjectId,
+              trialId,
+              siteId,
               effectiveDate: resource.effectiveDateTime,
               cancerType: resource.focus[0].reference,
               codedValue: resource.valueCodeableConcept,
-              basedOn: evidenceType ? evidenceType.valueCodeableConcept : '',
-              subjectId: subjectId,
-              trialId: trialId,
-              siteId: siteId,
             });
           });
 

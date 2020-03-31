@@ -23,5 +23,4 @@ const getExtensionByUrl = (extArr, url) => {
 module.exports = {
   getBundleResourcesByType,
   getExtensionByUrl,
-  hasProfile,
 };
