@@ -21,12 +21,12 @@ describe('Authorizer - formatToken', async () => {
 
 const generatePolicy = authorizerModule.__get__('generatePolicy');
 describe('Authorizer - generatePolicy', async () => {
-  xit('should work with a principal id, effect and resource', async () => {
+  it('should work with a principal id, effect and resource', async () => {
     const examplePrincipalId = 'examplePrincipalId';
     const exampleEffect = 'exampleEffect';
     const exampleResource = 'exampleResource';
     const policy = await generatePolicy(examplePrincipalId, exampleEffect, exampleResource);
     console.log('policy', JSON.stringify(policy));
-    expect(policy).to.equal(policyFixture);
+    expect(policy).to.eql(policyFixture);
   });
 });
