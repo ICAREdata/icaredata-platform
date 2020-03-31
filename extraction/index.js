@@ -40,7 +40,6 @@ exports.handler = async () => {
   treatmentPlanChangeWorksheet.columns = [
     {header: 'Effective Date', key: 'effectiveDate', width: 30},
     {header: 'Coded Value', key: 'codedValue', width: 30},
-    {header: 'Changed Flag', key: 'changedFlag', width: 30},
     {header: 'Subject ID', key: 'subjectId', width: 30},
     {header: 'Trial ID', key: 'trialId', width: 30},
     {header: 'Site ID', key: 'siteId', width: 30},
@@ -83,8 +82,8 @@ exports.handler = async () => {
 
             // Joins the array of evidence items
             const evidence = evidenceExtension ?
-            evidenceExtension.valueCodeableConcept.coding.map((c) => c.code).join(', ') :
-            '';
+              evidenceExtension.valueCodeableConcept.coding.map((c) => c.code).join(', ') :
+              '';
 
             diseaseStatusWorksheet.addRow({
               evidence,
@@ -119,10 +118,13 @@ exports.handler = async () => {
                 resource.extension[0].extension,
                 'ChangedFlag',
             );
+            const codedValue = changedFlag.valueBoolean ?
+              carePlanChangeReason.valueCodeableConcept :
+              'not evaluated';
 
             treatmentPlanChangeWorksheet.addRow({
               effectiveDate,
-              codedValue: carePlanChangeReason.valueCodeableConcept,
+              codedValue,
               changedFlag: changedFlag.valueBoolean,
               subjectId: subjectId,
               trialId: trialId,
