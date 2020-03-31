@@ -3,15 +3,25 @@ const {expect} = require('chai');
 const authorizerModule = rewire('../../authorizer');
 const policyFixture = require('../fixtures/authorizer/policy.json');
 
-describe('Authorizer - handler', async () => {
-  xit('should work', async () => {
-
+const formatToken = authorizerModule.__get__('formatToken');
+describe('Authorizer - formatToken', async () => {
+  xit('should remove the word BEARER', async () => {
+    const exampleToken = 'Bearer x';
+    expect(formatToken(exampleToken)).to.not.contain('Bearer');
+  });
+  xit('should not change the string if it does not contain "Bearer"', async () => {
+    const exampleToken1 = 'bearer 123123123';
+    const exampleToken2 = 'BEARER 123123123';
+    const exampleToken3 = '123123123';
+    expect(formatToken(exampleToken1)).to.equal(exampleToken1);
+    expect(formatToken(exampleToken2)).to.equal(exampleToken2);
+    expect(formatToken(exampleToken3)).to.equal(exampleToken3);
   });
 });
 
 const generatePolicy = authorizerModule.__get__('generatePolicy');
 describe('Authorizer - generatePolicy', async () => {
-  it('should work with a principal id, effect and resource', async () => {
+  xit('should work with a principal id, effect and resource', async () => {
     const examplePrincipalId = 'examplePrincipalId';
     const exampleEffect = 'exampleEffect';
     const exampleResource = 'exampleResource';
