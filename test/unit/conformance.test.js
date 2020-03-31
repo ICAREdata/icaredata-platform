@@ -1,7 +1,7 @@
 const {expect} = require('chai');
 const {handler} = require('../../conformance');
 
-describe('Metadata', async () => {
+describe('Metadata - handler', async () => {
   it('Should return a FHIR conformance statement', async () => {
     const response = await handler();
     expect(response.resourceType).to.equal('Conformance');
