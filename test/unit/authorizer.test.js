@@ -5,11 +5,11 @@ const policyFixture = require('../fixtures/authorizer/policy.json');
 
 const formatToken = authorizerModule.__get__('formatToken');
 describe('Authorizer - formatToken', async () => {
-  xit('should remove the word BEARER', async () => {
+  it('should remove the word BEARER', async () => {
     const exampleToken = 'Bearer x';
     expect(formatToken(exampleToken)).to.not.contain('Bearer');
   });
-  xit('should not change the string if it does not contain "Bearer"', async () => {
+  it('should not change the string if it does not contain "Bearer"', async () => {
     const exampleToken1 = 'bearer 123123123';
     const exampleToken2 = 'BEARER 123123123';
     const exampleToken3 = '123123123';
