@@ -76,10 +76,15 @@ exports.handler = async () => {
           );
 
           dsResources.forEach((resource) => {
+            const evidenceType = getExtensionByUrl(
+                resource.extension,
+                'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-evidence-type',
+            );
             diseaseStatusWorksheet.addRow({
               effectiveDate: resource.effectiveDateTime,
               cancerType: resource.focus[0].reference,
               codedValue: resource.valueCodeableConcept,
+              basedOn: evidenceType ? evidenceType.valueCodeableConcept : '',
               subjectId: subjectId,
               trialId: trialId,
               siteId: siteId,
