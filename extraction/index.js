@@ -82,7 +82,7 @@ exports.handler = async () => {
 
             // Joins the array of evidence items
             const evidence = evidenceExtension ?
-              evidenceExtension.valueCodeableConcept.coding.map((c) => c.code).join(', ') :
+              translateCodeableConcept(evidenceExtension.valueCodeableConcept) :
               '';
 
             diseaseStatusWorksheet.addRow({
@@ -92,7 +92,7 @@ exports.handler = async () => {
               siteId,
               effectiveDate: resource.effectiveDateTime,
               cancerType: resource.focus[0].reference,
-              codedValue: resource.valueCodeableConcept,
+              codedValue: translateCodeableConcept(resource.valueCodeableConcept),
             });
           });
 
@@ -119,7 +119,7 @@ exports.handler = async () => {
                 'ChangedFlag',
             );
             const codedValue = changedFlag.valueBoolean ?
-              carePlanChangeReason.valueCodeableConcept :
+              translateCodeableConcept(carePlanChangeReason.valueCodeableConcept) :
               'not evaluated';
 
             treatmentPlanChangeWorksheet.addRow({
@@ -160,4 +160,10 @@ exports.handler = async () => {
   knex.destroy();
 
   return response;
+};
+
+// Translates `valueCodeableConcept` into a format(codeSystem : code) to be input into spreadsheet
+// If there are multiple codes, will join them and delimit with |
+const translateCodeableConcept = (valueCodeableConcept) => {
+  return valueCodeableConcept.coding.map((c) => `${c.system} : ${c.code}`).join(' | ');
 };
