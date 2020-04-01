@@ -27,7 +27,7 @@ exports.handler = async () => {
   diseaseStatusWorksheet.columns = [
     {header: 'Effective Date', key: 'effectiveDate', width: 30},
     {header: 'Cancer Type', key: 'cancerType', width: 30},
-    {header: 'Coded Value', key: 'codedValue', width: 30},
+    {header: 'Code Value', key: 'codeValue', width: 30},
     {header: 'Evidence', key: 'evidence', width: 30},
     {header: 'Subject ID', key: 'subjectId', width: 30},
     {header: 'Trial ID', key: 'trialId', width: 30},
@@ -39,7 +39,7 @@ exports.handler = async () => {
   );
   treatmentPlanChangeWorksheet.columns = [
     {header: 'Effective Date', key: 'effectiveDate', width: 30},
-    {header: 'Coded Value', key: 'codedValue', width: 30},
+    {header: 'Code Value', key: 'codeValue', width: 30},
     {header: 'Subject ID', key: 'subjectId', width: 30},
     {header: 'Trial ID', key: 'trialId', width: 30},
     {header: 'Site ID', key: 'siteId', width: 30},
@@ -67,13 +67,7 @@ exports.handler = async () => {
           );
 
           // Get Disease Status resources and add relevant data to worksheet
-          const dsResources = getBundleResourcesByType(
-              bundleEntry,
-              'Observation',
-              {},
-              false,
-          );
-
+          const dsResources = getDiseaseStatusResources(bundleEntry);
           dsResources.forEach((resource) => {
             const evidenceExtension = getExtensionByUrl(
                 resource.extension,
@@ -92,7 +86,7 @@ exports.handler = async () => {
               siteId,
               effectiveDate: resource.effectiveDateTime,
               cancerType: resource.focus[0].reference,
-              codedValue: translateCodeableConcept(resource.valueCodeableConcept),
+              codeValue: translateCodeableConcept(resource.valueCodeableConcept),
             });
           });
 
@@ -118,13 +112,13 @@ exports.handler = async () => {
                 resource.extension[0].extension,
                 'ChangedFlag',
             );
-            const codedValue = changedFlag.valueBoolean ?
+            const codeValue = changedFlag.valueBoolean ?
               translateCodeableConcept(carePlanChangeReason.valueCodeableConcept) :
               'not evaluated';
 
             treatmentPlanChangeWorksheet.addRow({
               effectiveDate,
-              codedValue,
+              codeValue,
               changedFlag: changedFlag.valueBoolean,
               subjectId: subjectId,
               trialId: trialId,
@@ -166,4 +160,14 @@ exports.handler = async () => {
 // If there are multiple codes, will join them and delimit with |
 const translateCodeableConcept = (valueCodeableConcept) => {
   return valueCodeableConcept.coding.map((c) => `${c.system} : ${c.code}`).join(' | ');
+};
+
+// Filters Observation list for system and code specific to disease status
+const getDiseaseStatusResources = (bundle) => {
+  return getBundleResourcesByType(
+      bundle,
+      'Observation',
+      {},
+      false,
+  ).filter((r) => r.code.coding.some((c) => c.system === 'http://loinc.org' && c.code === '88040-1'));
 };
