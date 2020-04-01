@@ -3,6 +3,7 @@ const {saveToS3} = require('../utils/saveToS3.js');
 const {production} = require('../utils/knexfile.js');
 const responses = require('../utils/responses.js');
 const {getBundleResourcesByType, getExtensionByUrl} = require('../utils/fhirUtils');
+const {getCancerType} = require('../utils/conditionUtils');
 const exceljs = require('exceljs');
 const Stream = require('stream');
 const fs = require('fs');
@@ -26,8 +27,9 @@ exports.handler = async () => {
   const diseaseStatusWorksheet = workbook.addWorksheet('Disease Status');
   diseaseStatusWorksheet.columns = [
     {header: 'Effective Date', key: 'effectiveDate', width: 30},
-    {header: 'Cancer Type', key: 'cancerType', width: 30},
     {header: 'Code Value', key: 'codeValue', width: 30},
+    {header: 'Cancer Type', key: 'cancerType', width: 30},
+    {header: 'Cancer Code Value', key: 'cancerCodeValue', width: 30},
     {header: 'Evidence', key: 'evidence', width: 30},
     {header: 'Subject ID', key: 'subjectId', width: 30},
     {header: 'Trial ID', key: 'trialId', width: 30},
@@ -78,6 +80,7 @@ exports.handler = async () => {
             const evidence = evidenceExtension ?
               translateCodeableConcept(evidenceExtension.valueCodeableConcept) :
               '';
+            const condition = getConditionFromReference(bundleEntry, resource.focus[0].reference);
 
             diseaseStatusWorksheet.addRow({
               evidence,
@@ -85,7 +88,8 @@ exports.handler = async () => {
               trialId,
               siteId,
               effectiveDate: resource.effectiveDateTime,
-              cancerType: resource.focus[0].reference,
+              cancerType: getCancerType(condition),
+              cancerCodeValue: translateCodeableConcept(condition.code),
               codeValue: translateCodeableConcept(resource.valueCodeableConcept),
             });
           });
@@ -170,4 +174,14 @@ const getDiseaseStatusResources = (bundle) => {
       {},
       false,
   ).filter((r) => r.code.coding.some((c) => c.system === 'http://loinc.org' && c.code === '88040-1'));
+};
+
+// Retrieves condition resource by looking at id on reference
+const getConditionFromReference = (bundle, reference) => {
+  return getBundleResourcesByType(
+      bundle,
+      'Condition',
+      {},
+      false,
+  ).find((r) => r.id === reference.split('/')[1]);
 };
