@@ -1,0 +1,11 @@
+{
+  "hostname": "http://example.com",
+  "port": "8080",
+  "path": "/oauth/server/path",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/x-www-form-urlencoded",
+    "Authorization": "Basic dGVzdC11c2VybmFtZTp0ZXN0LXBhc3N3b3Jk",
+    "X-Forwarded-Host": "testing.icaredata.org"
+  }
+}

@@ -1,8 +1,19 @@
 const rewire = require('rewire');
 const {expect} = require('chai');
 const authorizerModule = rewire('../../authorizer');
+const requestOptsWithAuthHeader = require('../fixtures/authorizer/requestOptsWithAuthHeader.json');
 const policy = require('../fixtures/authorizer/policy.json');
 const policyWithoutDocument = require('../fixtures/authorizer/policyWithoutDocument.json');
+
+const generateOptionsWithAuthHeader = authorizerModule.__get__('generateOptionsWithAuthHeader');
+describe('Authorizer - generateOptionsWithAuthHeader', async () => {
+  it('should work', () => {
+    const username = 'test-username';
+    const password = 'test-password';
+    const generatedRequestOptions = generateOptionsWithAuthHeader(username, password);
+    expect(generatedRequestOptions).to.eql(requestOptsWithAuthHeader);
+  });
+});
 
 const formatToken = authorizerModule.__get__('formatToken');
 describe('Authorizer - formatToken', async () => {

@@ -5,8 +5,8 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 /**
  * Generate a url joining env-specific server path and provided params
- * @param {params} params the request query params
- * @return {int} The server-path with our query params properly appended
+ * @param {string[]} params the request query params
+ * @return {Object} The server-path with our query params properly appended
  */
 function generateQueryUrl(params) {
   if (_.isEmpty(params)) {
@@ -17,8 +17,8 @@ function generateQueryUrl(params) {
 
 /**
  * Generate request options based on env variables and search params
- * @param {params} params the request query params
- * @return {int} An options object for requests
+ * @param {string[]} params - the request query params
+ * @return {Object} An options object for requests
  */
 function generateOptions(params) {
   const options = {
@@ -35,12 +35,12 @@ function generateOptions(params) {
 };
 
 exports.handler = async (event) => {
-  const options = generateOptions(event.quiceryStringParameters);
+  const options = generateOptions(event.queryStringParameters);
 
   return new Promise((accept, reject) => {
     const req = https.request(options, (resp) => {
       let data = '';
-      // A chunk of data has been recieved.
+      // A chunk of data has been received.
       resp.on('data', (chunk) => {
         data += chunk;
       });
