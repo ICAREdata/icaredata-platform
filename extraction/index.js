@@ -8,6 +8,7 @@ const exceljs = require('exceljs');
 const Stream = require('stream');
 const fs = require('fs');
 const archiver = require('archiver');
+const knex = require('knex');
 archiver.registerFormat('zip-encrypted', require('archiver-zip-encrypted'));
 
 // Creates excel workbook with Disease Status and Treatment Plan Change Worksheets
@@ -161,7 +162,7 @@ const processData = (data, workbook) => {
   });
 };
 
-exports.handler = async () => {
+const connectToDB = async () => {
   const login = await getSecret('Lambda-RDS-Login');
   production.connection.user = login.username;
   production.connection.password = login.password;
@@ -169,12 +170,31 @@ exports.handler = async () => {
     rejectUnauthorized: true,
     ca: fs.readFileSync(__dirname + '/../utils/rds-ca-2019-root.pem'),
   };
+  return knex(production);
+};
 
+const getData = async (dbConnection) => {
+  return await dbConnection('data.messages').select('*');
+};
+
+const encryptZip = (stream, password) => {
+  const archive = archiver.create('zip-encrypted', {
+    password,
+    zlib: {level: 8},
+    encryptionMethod: 'aes256',
+  });
+
+  archive.append(stream, {name: 'icare.xlsx'});
+  archive.finalize();
+
+  return archive;
+};
+
+exports.handler = async () => {
+  const dbConnection = await connectToDB();
   const workbook = createIcareWorkbook();
   const stream = new Stream.PassThrough();
-  const knex = require('knex')(production);
-  const response = await knex('data.messages')
-      .select('*')
+  const response = await getData(dbConnection)
       .then(async (data) => {
         processData(data, workbook);
 
@@ -182,13 +202,7 @@ exports.handler = async () => {
             .write(stream)
             .then(async () => {
               const s3Password = await getSecret('S3-Zip-Password');
-              const archive = archiver.create('zip-encrypted', {
-                zlib: {level: 8},
-                encryptionMethod: 'aes256',
-                password: s3Password.password,
-              });
-              archive.append(stream, {name: 'icare.xlsx'});
-              archive.finalize();
+              const archive = encryptZip(stream, s3Password.password);
               await saveToS3(archive, 'icaredata-dev-extracted-data');
               return responses.response200;
             })
@@ -202,7 +216,7 @@ exports.handler = async () => {
         return responses.response500;
       });
 
-  knex.destroy();
+  dbConnection.destroy();
 
   return response;
 };
