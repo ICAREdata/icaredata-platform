@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test-unit": "mocha test --timeout 30000 ./test/unit/*.test.js --exit",
-    "test-integration": "mocha test --timeout 30000 ./test/integration/*.js --exit",
+    "test-integration": "mocha test --timeout 30000 ./test/integration/*.test.js --exit",
     "test": "mocha test --timeout 30000",
     "test-unit": "mocha test --timeout 30000 ./test/unit/*.test.js --exit",
     "build-message": "mkdir -p terraform/build && zip -qr terraform/build/process-message.zip process-message/ node_modules/ utils/",
