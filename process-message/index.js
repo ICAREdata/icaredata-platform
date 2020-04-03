@@ -35,7 +35,7 @@ const getSubjectId = (subject) => fhirpath.evaluate(subject, 'ResearchSubject.id
 const getSiteId = (messageHeader) => fhirpath.evaluate(messageHeader, 'MessageHeader.source.endpoint')[0];
 const getTrialId = (study) => fhirpath.evaluate(study, 'ResearchStudy.identifier.first().value')[0];
 
-exports.handler = async (event, context, callback) => {
+exports.handler = async (bundle, context, callback) => {
   const secret = await getSecret('Lambda-RDS-Login');
   production.connection.user = secret.username;
   production.connection.password = secret.password;
