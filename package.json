@@ -6,8 +6,7 @@
   "scripts": {
     "test-unit": "mocha test --timeout 30000 ./test/unit/*.test.js --exit",
     "test-integration": "mocha test --timeout 30000 ./test/integration/*.test.js --exit",
-    "test": "mocha test --timeout 30000",
-    "test-unit": "mocha test --timeout 30000 ./test/unit/*.test.js --exit",
+    "test": "mocha --recursive test --timeout 30000",
     "build-message": "mkdir -p terraform/build && zip -qr terraform/build/process-message.zip process-message/ node_modules/ utils/",
     "build-conformance": "mkdir -p terraform/build && zip -qr terraform/build/conformance.zip conformance/",
     "build-bulkdata": "mkdir -p terraform/build && zip -qr terraform/build/bulkdata.zip bulkdata/",
