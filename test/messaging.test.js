@@ -44,13 +44,13 @@ describe('Process Message', () => {
   });
 
   describe('resource retrieval', () => {
-    it('should return resource of deisred type', () => {
+    it('should return resource of desired type', () => {
       const resource = getBundleResourcesByType(exampleMessage, 'MessageHeader', {}, true);
       expect(resource).to.be.an('object');
       expect(resource.resourceType).to.equal('MessageHeader');
     });
 
-    it('should return multiple resources of same time', () => {
+    it('should return multiple resources of same type', () => {
       const bundle = getBundleResourcesByType(exampleMessage, 'Bundle', {}, true);
       expect(bundle).to.be.an('object');
       expect(bundle.resourceType).to.equal('Bundle');

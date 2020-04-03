@@ -7,14 +7,4 @@ module.exports = {
       database: 'icare',
     },
   },
-  testing: {
-    client: 'pg',
-    connection: {
-      host: 'localhost',
-      port: 5433,
-      user: process.env.DbUser, // Must set on local system
-      password: process.env.DbPwd, // Must set on local system
-      database: 'icare',
-    },
-  },
 };
