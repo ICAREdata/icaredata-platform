@@ -44,10 +44,12 @@ const createIcareWorkbook = () => {
   return workbook;
 };
 
-// Translates `valueCodeableConcept` into a format(codeSystem : code) to be input into spreadsheet
+// Translates `codeObject` into a format(codeSystem : code) to be input into spreadsheet
 // If there are multiple codes, will join them and delimit with |
-const translateCodeableConcept = (valueCodeableConcept) => {
-  return valueCodeableConcept.coding.map((c) => `${c.system} : ${c.code}`).join(' | ');
+const translateCode = (codeObject) => {
+  return codeObject.coding ?
+    codeObject.coding.map((c) => `${c.system} : ${c.code}`).join(' | ') :
+    '';
 };
 
 // Filters Observation list for system and code specific to disease status
@@ -57,7 +59,7 @@ const getDiseaseStatusResources = (bundle) => {
       'Observation',
       {},
       false,
-  ).filter((r) => r.code.coding.some((c) => c.system === 'http://loinc.org' && c.code === '88040-1'));
+  ).filter((r) => r.code && r.code.coding.some((c) => c.system === 'http://loinc.org' && c.code === '88040-1'));
 };
 
 // Retrieves condition resource by looking at id on reference
@@ -81,7 +83,7 @@ const addDiseaseStatusDataToWorksheet = (bundle, worksheet, trialData) => {
 
     // Joins the array of evidence items
     const evidence = evidenceExtension ?
-      translateCodeableConcept(evidenceExtension.valueCodeableConcept) :
+      translateCode(evidenceExtension.valueCodeableConcept) :
       '';
     const condition = getConditionFromReference(bundle, resource.focus[0].reference);
 
@@ -90,8 +92,8 @@ const addDiseaseStatusDataToWorksheet = (bundle, worksheet, trialData) => {
       evidence,
       effectiveDate: resource.effectiveDateTime,
       cancerType: getCancerType(condition),
-      cancerCodeValue: translateCodeableConcept(condition.code),
-      codeValue: translateCodeableConcept(resource.valueCodeableConcept),
+      cancerCodeValue: translateCode(condition.code),
+      codeValue: translateCode(resource.valueCodeableConcept),
     });
   });
 };
@@ -120,7 +122,7 @@ const addCarePlanDataToWorksheet = (bundle, worksheet, trialData) => {
         'ChangedFlag',
     );
     const codeValue = changedFlag.valueBoolean ?
-    translateCodeableConcept(carePlanChangeReason.valueCodeableConcept) :
+    translateCode(carePlanChangeReason.valueCodeableConcept) :
     'not evaluated';
 
     worksheet.addRow({
