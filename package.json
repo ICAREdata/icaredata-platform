@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha test --timeout 30000",
+    "test-unit": "mocha test --timeout 30000 ./test/unit/*.test.js --exit",
     "build-message": "mkdir -p terraform/build && zip -qr terraform/build/process-message.zip process-message/ node_modules/ utils/",
     "build-conformance": "mkdir -p terraform/build && zip -qr terraform/build/conformance.zip conformance/",
     "build-bulkdata": "mkdir -p terraform/build && zip -qr terraform/build/bulkdata.zip bulkdata/",
@@ -25,7 +26,8 @@
     "fs": "0.0.1-security",
     "knex": "^0.19.5",
     "lodash": "^4.17.15",
-    "pg": "^7.18.1"
+    "pg": "^7.18.1",
+    "rewire": "^5.0.0"
   },
   "devDependencies": {
     "axios": "^0.19.0",

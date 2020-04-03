@@ -1,31 +1,32 @@
 const secondaryCancerConditionVS = require('./valueSets/ValueSet-onco-core-SecondaryCancerDisorderVS.json');
 
-const checkCodeInVS = (code, valueSet) => {
-  // strips the period in the code since the provided value set has the periods removed
-  return valueSet.compose.include[2].concept.map((c) => c.code).includes(code.replace('.', ''));
-};
-
 /**
- * Checks for ICD-10 code
+ * Check if condition is in value set
  * @param {object} condition fhir resource
- * @return {code} if condition has an ICD10 code
+ * @param {object} valueSet contains list of codes included in value set
+ * @return {boolean} true if condition is in valueSet
  */
-const getICD10Code = (condition) => {
-  if (condition && condition.code) {
-    const {coding} = condition.code;
+const checkCodeInVS = (condition, valueSet) => {
+  if (!condition.code || !condition.code.coding) return false;
+  const coding = condition.code.coding;
 
-    if (coding && coding.length > 0) {
-      return coding.find((c) => c.system === 'http://hl7.org/fhir/sid/icd-10-cm');
-    }
+  // If valueSet has expansion, we only need to check these codes since everything in compose is in expansion
+  if (valueSet.expansion) {
+    return coding.some((c) => {
+      return valueSet.expansion.contains.some((containsItem) => {
+        return c.system === containsItem.system && c.code === containsItem.code;
+      });
+    });
   }
-  return undefined;
-};
 
-
-// Checks if condition's ICD10 code is in valueset
-const checkConditionInVS = (condition, vs) => {
-  const icd10Code = getICD10Code(condition);
-  return icd10Code && checkCodeInVS(icd10Code.code, vs);
+  // Checks if code is in any of the valueSet.compose.include arrays
+  return coding.some((c) => {
+    return valueSet.compose.include.some((includeItem) => {
+      if (!includeItem.concept) return false;
+      return c.system === includeItem.system &&
+        includeItem.concept.map((concept) => concept.code).includes(c.code);
+    });
+  });
 };
 
 /**
@@ -34,10 +35,9 @@ const checkConditionInVS = (condition, vs) => {
  * @return {string} primary or secondary
  */
 const getCancerType = (condition) => {
-  return checkConditionInVS(condition, secondaryCancerConditionVS) ? 'secondary' : 'primary';
+  return checkCodeInVS(condition, secondaryCancerConditionVS) ? 'secondary' : 'primary';
 };
 
 module.exports = {
   getCancerType,
-  getICD10Code,
 };
