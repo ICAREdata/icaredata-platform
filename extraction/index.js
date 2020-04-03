@@ -10,15 +10,8 @@ const fs = require('fs');
 const archiver = require('archiver');
 archiver.registerFormat('zip-encrypted', require('archiver-zip-encrypted'));
 
-exports.handler = async () => {
-  const login = await getSecret('Lambda-RDS-Login');
-  production.connection.user = login.username;
-  production.connection.password = login.password;
-  production.connection.ssl = {
-    rejectUnauthorized: true,
-    ca: fs.readFileSync(__dirname + '/../utils/rds-ca-2019-root.pem'),
-  };
-
+// Creates excel workbook with Disease Status and Treatment Plan Change Worksheets
+const createIcareWorkbook = () => {
   const workbook = new exceljs.Workbook();
   workbook.creator = 'icaredata';
   workbook.created = workbook.modified = new Date();
@@ -47,89 +40,143 @@ exports.handler = async () => {
     {header: 'Site ID', key: 'siteId', width: 30},
   ];
 
+  return workbook;
+};
+
+// Translates `valueCodeableConcept` into a format(codeSystem : code) to be input into spreadsheet
+// If there are multiple codes, will join them and delimit with |
+const translateCodeableConcept = (valueCodeableConcept) => {
+  return valueCodeableConcept.coding.map((c) => `${c.system} : ${c.code}`).join(' | ');
+};
+
+// Filters Observation list for system and code specific to disease status
+const getDiseaseStatusResources = (bundle) => {
+  return getBundleResourcesByType(
+      bundle,
+      'Observation',
+      {},
+      false,
+  ).filter((r) => r.code.coding.some((c) => c.system === 'http://loinc.org' && c.code === '88040-1'));
+};
+
+// Retrieves condition resource by looking at id on reference
+const getConditionFromReference = (bundle, reference) => {
+  return getBundleResourcesByType(
+      bundle,
+      'Condition',
+      {},
+      false,
+  ).find((r) => r.id === reference.split('/')[1]);
+};
+
+// Add Disease Status Resource to worksheet
+const addDiseaseStatusDataToWorksheet = (bundle, worksheet, trialData) => {
+  const dsResources = getDiseaseStatusResources(bundle);
+  dsResources.forEach((resource) => {
+    const evidenceExtension = getExtensionByUrl(
+        resource.extension,
+        'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-evidence-type',
+    );
+
+    // Joins the array of evidence items
+    const evidence = evidenceExtension ?
+      translateCodeableConcept(evidenceExtension.valueCodeableConcept) :
+      '';
+    const condition = getConditionFromReference(bundle, resource.focus[0].reference);
+
+    worksheet.addRow({
+      ...trialData,
+      evidence,
+      effectiveDate: resource.effectiveDateTime,
+      cancerType: getCancerType(condition),
+      cancerCodeValue: translateCodeableConcept(condition.code),
+      codeValue: translateCodeableConcept(resource.valueCodeableConcept),
+    });
+  });
+};
+
+// Add Careplan resources to worksheet
+const addCarePlanDataToWorksheet = (bundle, worksheet, trialData) => {
+  // Get CarePlan Resources and add data to worksheet
+  const carePlanResources = getBundleResourcesByType(
+      bundle,
+      'CarePlan',
+      {},
+      false,
+  );
+  carePlanResources.forEach((resource) => {
+    const reviewDate = getExtensionByUrl(
+        resource.extension[0].extension,
+        'ReviewDate',
+    );
+    const effectiveDate = reviewDate ? reviewDate.valueDate : '';
+    const carePlanChangeReason = getExtensionByUrl(
+        resource.extension[0].extension,
+        'CarePlanChangedReason',
+    );
+    const changedFlag = getExtensionByUrl(
+        resource.extension[0].extension,
+        'ChangedFlag',
+    );
+    const codeValue = changedFlag.valueBoolean ?
+    translateCodeableConcept(carePlanChangeReason.valueCodeableConcept) :
+    'not evaluated';
+
+    worksheet.addRow({
+      ...trialData,
+      effectiveDate,
+      codeValue,
+    });
+  });
+};
+
+const addIcareDataToWorkbook = (bundle, workbook, trialData) => {
+  const diseaseStatusWorksheet = workbook.getWorksheet('Disease Status');
+  const treatmentPlanChangeWorksheet = workbook.getWorksheet('Treatment Plan Change');
+
+  addDiseaseStatusDataToWorksheet(bundle, diseaseStatusWorksheet, trialData);
+  addCarePlanDataToWorksheet(bundle, treatmentPlanChangeWorksheet, trialData);
+};
+
+// Processes rows in data.messages and adds to workbook
+const processData = (data, workbook) => {
+  // Loop through all rows in data.messages
+  data.forEach((d) => {
+    const {
+      bundle,
+      subject_id: subjectId,
+      trial_id: trialId,
+      site_id: siteId,
+    } = d;
+
+    const containedBundle = getBundleResourcesByType(
+        bundle,
+        'Bundle',
+        {},
+        true,
+    );
+
+    const trialData = {subjectId, trialId, siteId};
+    addIcareDataToWorkbook(containedBundle, workbook, trialData);
+  });
+};
+
+exports.handler = async () => {
+  const login = await getSecret('Lambda-RDS-Login');
+  production.connection.user = login.username;
+  production.connection.password = login.password;
+  production.connection.ssl = {
+    rejectUnauthorized: true,
+    ca: fs.readFileSync(__dirname + '/../utils/rds-ca-2019-root.pem'),
+  };
+
+  const workbook = createIcareWorkbook();
   const stream = new Stream.PassThrough();
   const knex = require('knex')(production);
   const response = await knex('data.messages')
       .select('*')
       .then(async (data) => {
-        // Loop through all rows in data.messages
-        data.forEach((d) => {
-          const {
-            bundle,
-            subject_id: subjectId,
-            trial_id: trialId,
-            site_id: siteId,
-          } = d;
-
-          const bundleEntry = getBundleResourcesByType(
-              bundle,
-              'Bundle',
-              {},
-              true,
-          );
-
-          // Get Disease Status resources and add relevant data to worksheet
-          const dsResources = getDiseaseStatusResources(bundleEntry);
-          dsResources.forEach((resource) => {
-            const evidenceExtension = getExtensionByUrl(
-                resource.extension,
-                'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-evidence-type',
-            );
-
-            // Joins the array of evidence items
-            const evidence = evidenceExtension ?
-              translateCodeableConcept(evidenceExtension.valueCodeableConcept) :
-              '';
-            const condition = getConditionFromReference(bundleEntry, resource.focus[0].reference);
-
-            diseaseStatusWorksheet.addRow({
-              evidence,
-              subjectId,
-              trialId,
-              siteId,
-              effectiveDate: resource.effectiveDateTime,
-              cancerType: getCancerType(condition),
-              cancerCodeValue: translateCodeableConcept(condition.code),
-              codeValue: translateCodeableConcept(resource.valueCodeableConcept),
-            });
-          });
-
-          // Get CarePlan Resources and add data to worksheet
-          const carePlanResources = getBundleResourcesByType(
-              bundleEntry,
-              'CarePlan',
-              {},
-              false,
-          );
-
-          carePlanResources.forEach((resource) => {
-            const reviewDate = getExtensionByUrl(
-                resource.extension[0].extension,
-                'ReviewDate',
-            );
-            const effectiveDate = reviewDate ? reviewDate.valueDate : '';
-            const carePlanChangeReason = getExtensionByUrl(
-                resource.extension[0].extension,
-                'CarePlanChangedReason',
-            );
-            const changedFlag = getExtensionByUrl(
-                resource.extension[0].extension,
-                'ChangedFlag',
-            );
-            const codeValue = changedFlag.valueBoolean ?
-              translateCodeableConcept(carePlanChangeReason.valueCodeableConcept) :
-              'not evaluated';
-
-            treatmentPlanChangeWorksheet.addRow({
-              effectiveDate,
-              codeValue,
-              changedFlag: changedFlag.valueBoolean,
-              subjectId: subjectId,
-              trialId: trialId,
-              siteId: siteId,
-            });
-          });
-        });
+        processData(data, workbook);
 
         return await workbook.xlsx
             .write(stream)
@@ -158,30 +205,4 @@ exports.handler = async () => {
   knex.destroy();
 
   return response;
-};
-
-// Translates `valueCodeableConcept` into a format(codeSystem : code) to be input into spreadsheet
-// If there are multiple codes, will join them and delimit with |
-const translateCodeableConcept = (valueCodeableConcept) => {
-  return valueCodeableConcept.coding.map((c) => `${c.system} : ${c.code}`).join(' | ');
-};
-
-// Filters Observation list for system and code specific to disease status
-const getDiseaseStatusResources = (bundle) => {
-  return getBundleResourcesByType(
-      bundle,
-      'Observation',
-      {},
-      false,
-  ).filter((r) => r.code.coding.some((c) => c.system === 'http://loinc.org' && c.code === '88040-1'));
-};
-
-// Retrieves condition resource by looking at id on reference
-const getConditionFromReference = (bundle, reference) => {
-  return getBundleResourcesByType(
-      bundle,
-      'Condition',
-      {},
-      false,
-  ).find((r) => r.id === reference.split('/')[1]);
 };
