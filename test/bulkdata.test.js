@@ -1,5 +1,5 @@
 const {expect} = require('chai');
-const {handler} = require('../../bulkdata');
+const {handler} = require('../bulkdata');
 
 describe('Bulkdata', async () => {
   describe('handler', async () => {

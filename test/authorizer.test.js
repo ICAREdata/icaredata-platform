@@ -1,9 +1,9 @@
 const rewire = require('rewire');
 const {expect} = require('chai');
-const authorizerModule = rewire('../../authorizer');
-const requestOptsWithAuthHeader = require('../fixtures/authorizer/requestOptsWithAuthHeader.json');
-const policy = require('../fixtures/authorizer/policy.json');
-const policyWithoutDocument = require('../fixtures/authorizer/policyWithoutDocument.json');
+const requestOptsWithAuthHeader = require('./fixtures/authorizer/requestOptsWithAuthHeader.json');
+const policy = require('./fixtures/authorizer/policy.json');
+const policyWithoutDocument = require('./fixtures/authorizer/policyWithoutDocument.json');
+const authorizerModule = rewire('../authorizer');
 
 describe('Authorizer', async () => {
   const generateOptionsWithAuthHeader = authorizerModule.__get__('generateOptionsWithAuthHeader');

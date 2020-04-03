@@ -1,8 +1,8 @@
-require('dotenv').config({path: '../fixtures/.env'});
+require('dotenv').config({path: './fixtures/.env'});
 const {expect} = require('chai');
 const rewire = require('rewire');
-const exampleMessage = require('../fixtures/messaging/exampleR4Message.json');
-const processMessage = rewire('../../process-message');
+const exampleMessage = require('./fixtures/messaging/exampleR4Message.json');
+const processMessage = rewire('../process-message');
 
 // helpers from process-message/index.js
 const isValidFHIRBundle = processMessage.__get__('isValidFHIRBundle');

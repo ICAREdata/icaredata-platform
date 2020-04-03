@@ -1,8 +1,8 @@
 const path = require('path');
 require('dotenv').config({path: path.resolve(process.cwd(), './test/fixtures/.env')});
 const rewire = require('rewire');
-const proxyModule = rewire('../../proxy');
 const {expect} = require('chai');
+const proxyModule = rewire('../proxy');
 
 const generateQueryUrl = proxyModule.__get__('generateQueryUrl');
 describe('Proxy', async () => {
