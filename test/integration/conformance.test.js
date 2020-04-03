@@ -11,7 +11,6 @@ describe('Conformance endpoint', async () => {
     const resp = await apiGateway.get('/metadata')
         .then((r) => r)
         .catch((e) => e.response);
-    console.log(resp);
 
     expect(resp).to.have.property('status');
     expect(resp.status).to.equal(200);
