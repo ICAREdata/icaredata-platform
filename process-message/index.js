@@ -79,17 +79,17 @@ exports.handler = async (bundle, context, callback) => {
   }
   console.log('Collected MessageHeader and Bundle.');
 
-  const researchSubject = getBundleResourcesByType(bundle, 'ResearchSubject', {}, true);
+  const researchSubject = getBundleResourcesByType(containedBundle, 'ResearchSubject', {}, true);
   if (!researchSubject) {
     callback(responses.response400(
-        'Bundle does not contain ResearchSubject.',
+        'ContainedBundle does not contain ResearchSubject.',
     ));
     return;
   }
-  const researchStudy = getBundleResourcesByType(bundle, 'ResearchStudy', {}, true);
+  const researchStudy = getBundleResourcesByType(containedBundle, 'ResearchStudy', {}, true);
   if (!researchStudy) {
     callback(responses.response400(
-        'Bundle does not contain ResearchStudy.',
+        'ContainedBundle does not contain ResearchStudy.',
     ));
     return;
   }
