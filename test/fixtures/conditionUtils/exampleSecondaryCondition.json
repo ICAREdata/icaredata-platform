@@ -1,0 +1,17 @@
+{
+  "resourceType": "Condition",
+  "id": "secondary",
+  "code": {
+      "coding": [
+          {
+              "system": "http://snomed.info/sct",
+              "code": "94225005"
+          },
+          {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "C7981",
+              "display": "Secondary malignant neoplasm of breast"
+          }
+      ]
+  }
+}
