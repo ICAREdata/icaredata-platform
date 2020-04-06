@@ -14,22 +14,6 @@ const validator = ajv.addSchema(schema, 'FHIR');
 const isValidFHIRBundle = (bundle) => validator.validate('FHIR', bundle);
 const isMessageBundle = (bundle) => fhirpath.evaluate(bundle, 'Bundle.type')[0] === 'message';
 
-// Utility function to get the resources of a type from our message bundle
-// Optionally get only the first resource of that type via 'first' parameter
-const getBundleResourcesByType = (message, type, context = {}, first) => {
-  const resources = fhirpath.evaluate(
-      message,
-      `Bundle.entry.where(resource.resourceType='${type}').resource`,
-      context,
-  );
-
-  if (resources.length > 0) {
-    return first ? resources[0] : resources;
-  } else {
-    return first ? null : [];
-  }
-};
-
 const getBundleId = (bundle) => fhirpath.evaluate(bundle, 'Bundle.id')[0];
 const getSubjectId = (subject) => fhirpath.evaluate(subject, 'ResearchSubject.identifier.first().value')[0];
 const getSiteId = (messageHeader) => fhirpath.evaluate(messageHeader, 'MessageHeader.source.endpoint')[0];
