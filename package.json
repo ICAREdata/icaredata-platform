@@ -4,14 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test --timeout 30000",
-    "test-unit": "mocha test --timeout 30000 ./test/unit/*.test.js --exit",
+    "test": "mocha test --timeout 5000",
     "build-message": "mkdir -p terraform/build && zip -qr terraform/build/process-message.zip process-message/ node_modules/ utils/",
     "build-conformance": "mkdir -p terraform/build && zip -qr terraform/build/conformance.zip conformance/",
     "build-bulkdata": "mkdir -p terraform/build && zip -qr terraform/build/bulkdata.zip bulkdata/",
     "build-extraction": "mkdir -p terraform/build && zip -qr terraform/build/extraction.zip extraction/ node_modules/ utils/",
     "build-authorizer": "mkdir -p terraform/build && zip -qr terraform/build/authorizer.zip authorizer/ utils/",
-    "build-proxy": "mkdir -p terraform/build && zip -qr terraform/build/proxy.zip proxy/",
+    "build-proxy": "mkdir -p terraform/build && zip -qr terraform/build/proxy.zip proxy/ node_modules/",
     "build-all": "npm run build-message && npm run build-conformance && npm run build-bulkdata && npm run build-extraction && npm run build-authorizer && npm run build-proxy"
   },
   "author": "",
@@ -21,6 +20,7 @@
     "archiver": "^3.1.1",
     "archiver-zip-encrypted": "^1.0.8",
     "aws-sdk": "^2.594.0",
+    "dotenv": "^8.2.0",
     "exceljs": "^3.8.1",
     "fhirpath": "^0.17.4",
     "fs": "0.0.1-security",
@@ -35,7 +35,9 @@
     "eslint": "^6.6.0",
     "eslint-config-google": "^0.14.0",
     "grunt": "^1.0.4",
+    "icaredata-client": "https://github.com/icaredata/icaredata-client",
     "mocha": "^6.2.2",
+    "nock": "12.0.2",
     "node-jose": "^1.1.3"
   },
   "repository": {

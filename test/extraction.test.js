@@ -1,7 +1,7 @@
 const {expect} = require('chai');
 const rewire = require('rewire');
-const extraction = rewire('../../extraction');
-const data = require('../fixtures/extraction/data.json');
+const extraction = rewire('../extraction');
+const data = require('./fixtures/extraction/data.json');
 
 // helpers from extraction/index.js
 const createIcareWorkbook = extraction.__get__('createIcareWorkbook');

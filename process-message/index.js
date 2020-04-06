@@ -7,7 +7,19 @@ const fhirpath = require('fhirpath');
 const fs = require('fs');
 const Ajv = require('ajv');
 
-exports.handler = async (event, context, callback) => {
+const ajv = new Ajv({logger: false});
+ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'));
+const validator = ajv.addSchema(schema, 'FHIR');
+
+const isValidFHIRBundle = (bundle) => validator.validate('FHIR', bundle);
+const isMessageBundle = (bundle) => fhirpath.evaluate(bundle, 'Bundle.type')[0] === 'message';
+
+const getBundleId = (bundle) => fhirpath.evaluate(bundle, 'Bundle.id')[0];
+const getSubjectId = (subject) => fhirpath.evaluate(subject, 'ResearchSubject.identifier.first().value')[0];
+const getSiteId = (messageHeader) => fhirpath.evaluate(messageHeader, 'MessageHeader.source.endpoint')[0];
+const getTrialId = (study) => fhirpath.evaluate(study, 'ResearchStudy.identifier.first().value')[0];
+
+exports.handler = async (bundle, context, callback) => {
   const secret = await getSecret('Lambda-RDS-Login');
   production.connection.user = secret.username;
   production.connection.password = secret.password;
@@ -18,11 +30,7 @@ exports.handler = async (event, context, callback) => {
 
   const knex = require('knex')(production);
 
-  const ajv = new Ajv({logger: false});
-  ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'));
-
-  const valid = ajv.addSchema(schema, 'FHIR').validate('FHIR', event);
-  if (!valid) {
+  if (!isValidFHIRBundle(bundle)) {
     callback(responses.response400(
         'Request body is not a valid FHIR R4 Bundle.',
     ));
@@ -30,9 +38,7 @@ exports.handler = async (event, context, callback) => {
   }
   console.log(`Bundle is valid FHIR R4.`);
 
-  const isMessage =
-    (fhirpath.evaluate(event, 'Bundle.type')[0] === 'message');
-  if (!isMessage) {
+  if (!isMessageBundle(bundle)) {
     callback(responses.response400(
         'FHIR Bundle is not a Message.',
     ));
@@ -40,16 +46,16 @@ exports.handler = async (event, context, callback) => {
   }
   console.log('Verified Bundle is a Message.');
 
-  const messageHeader =
-    getBundleResourcesByType(event, 'MessageHeader', {}, true);
+  const messageHeader = getBundleResourcesByType(bundle, 'MessageHeader', {}, true);
   if (!messageHeader) {
     callback(responses.response400(
         'Message does not contain MessageHeader.',
     ));
     return;
   }
-  const bundle = getBundleResourcesByType(event, 'Bundle', {}, true);
-  if (!bundle) {
+
+  const containedBundle = getBundleResourcesByType(bundle, 'Bundle', {}, true);
+  if (!containedBundle) {
     callback(responses.response400(
         'Message does not contain Bundle.',
     ));
@@ -57,19 +63,17 @@ exports.handler = async (event, context, callback) => {
   }
   console.log('Collected MessageHeader and Bundle.');
 
-  const researchSubject =
-    getBundleResourcesByType(bundle, 'ResearchSubject', {}, true);
+  const researchSubject = getBundleResourcesByType(containedBundle, 'ResearchSubject', {}, true);
   if (!researchSubject) {
     callback(responses.response400(
-        'Bundle does not contain ResearchSubject.',
+        'ContainedBundle does not contain ResearchSubject.',
     ));
     return;
   }
-  const researchStudy =
-    getBundleResourcesByType(bundle, 'ResearchStudy', {}, true);
+  const researchStudy = getBundleResourcesByType(containedBundle, 'ResearchStudy', {}, true);
   if (!researchStudy) {
     callback(responses.response400(
-        'Bundle does not contain ResearchStudy.',
+        'ContainedBundle does not contain ResearchStudy.',
     ));
     return;
   }
@@ -77,19 +81,10 @@ exports.handler = async (event, context, callback) => {
 
   // Collect all information that we want to store in the database
   // from the resources
-  const bundleId = fhirpath.evaluate(event, 'Bundle.id')[0];
-  const subjectId = fhirpath.evaluate(
-      researchSubject,
-      'ResearchSubject.identifier.first().value',
-  )[0];
-  const siteId = fhirpath.evaluate(
-      messageHeader,
-      'MessageHeader.source.endpoint',
-  )[0];
-  const trialId = fhirpath.evaluate(
-      researchStudy,
-      'ResearchStudy.identifier.first().value',
-  )[0];
+  const bundleId = getBundleId(bundle);
+  const subjectId = getSubjectId(researchSubject);
+  const siteId = getSiteId(messageHeader);
+  const trialId = getTrialId(researchStudy);
   const hasInfo = (bundleId && subjectId && trialId); // siteId not required
   if (!hasInfo) {
     callback(responses.response400(
@@ -105,7 +100,7 @@ exports.handler = async (event, context, callback) => {
     subject_id: subjectId,
     site_id: siteId,
     trial_id: trialId,
-    bundle: event,
+    bundle: bundle,
   };
 
   console.log('Inserting Message data into the database.');

@@ -7,19 +7,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 exports.handler = async (event) => {
   const secret = await getSecret('Keycloak-Authorizer');
-  const authHeader =
-    Buffer.from(`${secret.username}:${secret.password}`).toString('base64');
-  const options = {
-    hostname: process.env.OAUTH_SERVER_HOST,
-    port: process.env.OAUTH_SERVER_PORT,
-    path: process.env.OAUTH_SERVER_PATH,
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': `Basic ${authHeader}`,
-      'X-Forwarded-Host': 'testing.icaredata.org',
-    },
-  };
+  const options = generateOptionsWithAuthHeader(secret.username, secret.password);
 
   return new Promise((accept, reject) => {
     const req = https.request(options, (resp) => {
@@ -56,12 +44,47 @@ exports.handler = async (event) => {
   });
 };
 
-const formatToken = (token) =>{
+
+/**
+ * Generate request options based on env variables and a username/pass
+ * to be used in an authorization header
+ * @param {string} username for auth header
+ * @param {string} password for auth header
+ * @return {Object} An options object for requests with auth header
+ */
+function generateOptionsWithAuthHeader(username, password) {
+  const authHeader =
+    Buffer.from(`${username}:${password}`).toString('base64');
+  return {
+    hostname: process.env.OAUTH_SERVER_HOST,
+    port: process.env.OAUTH_SERVER_PORT,
+    path: process.env.OAUTH_SERVER_PATH,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': `Basic ${authHeader}`,
+      'X-Forwarded-Host': 'testing.icaredata.org',
+    },
+  };
+}
+
+/**
+ * Remove 'Bearer' keyword from Bearer token
+ * @param {string} token - a Bearer token
+ * @return {string} The token sans Bearer keyword
+ */
+function formatToken(token) {
   return token.replace('Bearer ', '');
 };
 
-// Help function to generate an IAM policy
-const generatePolicy = (principalId, effect, resource) => {
+/**
+ * Generate an IAM policy
+ * @param {string} principalId for policy
+ * @param {string} effect for policy
+ * @param {string} resource for policy
+ * @return {Object} An IAM policy-object
+ */
+function generatePolicy(principalId, effect, resource) {
   const authResponse = {};
 
   authResponse.principalId = principalId;

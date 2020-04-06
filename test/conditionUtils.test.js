@@ -1,8 +1,8 @@
 const rewire = require('rewire');
 const {expect} = require('chai');
-const conditionUtils = rewire('../../utils/conditionUtils');
-const exampleSecondaryCondition = require('../fixtures/conditionUtils/exampleSecondaryCondition.json');
-const secondaryCancerConditionVS = require('../../utils/valueSets/ValueSet-onco-core-SecondaryCancerDisorderVS.json');
+const conditionUtils = rewire('../utils/conditionUtils');
+const exampleSecondaryCondition = require('./fixtures/conditionUtils/exampleSecondaryCondition.json');
+const secondaryCancerConditionVS = require('../utils/valueSets/ValueSet-onco-core-SecondaryCancerDisorderVS.json');
 
 describe('Condition Utility', () => {
   describe('getCancerType', () => {
