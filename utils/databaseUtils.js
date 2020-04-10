@@ -7,8 +7,8 @@ const getDatabaseConfiguration = async (login) => {
     client: 'pg',
     connection: {
       host: process.env.DATABASE_HOST || '',
-      port: process.env.DATABASE_PORT || 8080,
-      database: process.env.DATABASE_NAME || '',
+      port: process.env.DATABASE_PORT || 5432,
+      database: process.env.DATABASE_NAME || 'icare',
       user: secret.username || '',
       password: secret.password || '',
       ssl: {
