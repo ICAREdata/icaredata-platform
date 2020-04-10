@@ -1,12 +1,11 @@
 const {getSecret} = require('../utils/getSecret.js');
 const {saveToS3} = require('../utils/saveToS3.js');
-const {production} = require('../utils/knexfile.js');
+const {getDatabaseConfiguration} = require('../utils/databaseUtils');
 const responses = require('../utils/responses.js');
 const {getBundleResourcesByType, getExtensionByUrl} = require('../utils/fhirUtils');
 const {getCancerType} = require('../utils/conditionUtils');
 const exceljs = require('exceljs');
 const Stream = require('stream');
-const fs = require('fs');
 const archiver = require('archiver');
 const knex = require('knex');
 archiver.registerFormat('zip-encrypted', require('archiver-zip-encrypted'));
@@ -165,14 +164,8 @@ const processData = (data, workbook) => {
 };
 
 const connectToDB = async () => {
-  const login = await getSecret('Lambda-RDS-Login');
-  production.connection.user = login.username;
-  production.connection.password = login.password;
-  production.connection.ssl = {
-    rejectUnauthorized: true,
-    ca: fs.readFileSync(__dirname + '/../utils/rds-ca-2019-root.pem'),
-  };
-  return knex(production);
+  const databaseConfig = await getDatabaseConfiguration('Lambda-RDS-Login');
+  return knex(databaseConfig);
 };
 
 const getData = async (dbConnection) => {

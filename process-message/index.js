@@ -1,11 +1,10 @@
-const {getSecret} = require('../utils/getSecret.js');
-const {production} = require('../utils/knexfile.js');
+const {getDatabaseConfiguration} = require('../utils/databaseUtils');
 const responses = require('../utils/responses.js');
 const {getBundleResourcesByType} = require('../utils/fhirUtils');
 const schema = require('../utils/fhir.schema.json');
 const fhirpath = require('fhirpath');
-const fs = require('fs');
 const Ajv = require('ajv');
+const knex = require('knex');
 
 const ajv = new Ajv({logger: false});
 ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'));
@@ -20,15 +19,8 @@ const getSiteId = (messageHeader) => fhirpath.evaluate(messageHeader, 'MessageHe
 const getTrialId = (study) => fhirpath.evaluate(study, 'ResearchStudy.identifier.first().value')[0];
 
 exports.handler = async (bundle, context, callback) => {
-  const secret = await getSecret('Lambda-RDS-Login');
-  production.connection.user = secret.username;
-  production.connection.password = secret.password;
-  production.connection.ssl = {
-    rejectUnauthorized: true,
-    ca: fs.readFileSync(__dirname + '/../utils/rds-ca-2019-root.pem'),
-  };
-
-  const knex = require('knex')(production);
+  const databaseConfig = await getDatabaseConfiguration('Lambda-RDS-Login');
+  const dbConnection = knex(databaseConfig);
 
   if (!isValidFHIRBundle(bundle)) {
     callback(responses.response400(
@@ -105,7 +97,7 @@ exports.handler = async (bundle, context, callback) => {
 
   console.log('Inserting Message data into the database.');
   // Finally, try to insert the data into the database
-  const response = await knex
+  const response = await dbConnection
       .insert([info])
       .into('data.messages')
       .then((r) => {
@@ -136,7 +128,7 @@ exports.handler = async (bundle, context, callback) => {
           return responses.response500;
         }
       });
-  knex.destroy();
+  dbConnection.destroy();
 
   if (response === responses.response200) {
     return response;
