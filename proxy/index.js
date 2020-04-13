@@ -1,7 +1,6 @@
 const https = require('https');
 const querystring = require('querystring');
 const _ = require('lodash');
-// process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 /**
  * Generate a url joining env-specific server path and provided params
@@ -41,10 +40,6 @@ exports.handler = async (event) => {
     // the mulitline ca file with contain \n characters which will need to be
     // changed back into actual newline chars.  This oddity performs that function.
     options.ca = process.env.CA_FILE.split('\n').join('\n');
-  }
-
-  if (process.env.REJECT_UNAUTHORIZED === 'false') {
-    options.rejectUnathorized = false;
   }
 
   return new Promise((accept, reject) => {

@@ -2,9 +2,6 @@ const https = require('https');
 const querystring = require('querystring');
 const {getSecret} = require('../utils/getSecret.js');
 
-// TODO: remove this and get the server a proper certificate
-// process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
 exports.handler = async (event) => {
   const secret = await getSecret('Keycloak-Authorizer');
   const options = generateOptionsWithAuthHeader(secret.username, secret.password);
@@ -13,10 +10,6 @@ exports.handler = async (event) => {
     // the mulitline ca file with contain \n characters which will need to be
     // changed back into actual newline chars.  This oddity performs that function.
     options.ca = process.env.CA_FILE.split('\n').join('\n');
-  }
-
-  if (process.env.REJECT_UNAUTHORIZED === 'false') {
-    options.rejectUnathorized = false;
   }
 
   return new Promise((accept, reject) => {
