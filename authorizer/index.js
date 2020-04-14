@@ -6,12 +6,6 @@ exports.handler = async (event) => {
   const secret = await getSecret('Keycloak-Authorizer');
   const options = generateOptionsWithAuthHeader(secret.username, secret.password);
 
-  if (process.env.CA_FILE) {
-    // the mulitline ca file with contain \n characters which will need to be
-    // changed back into actual newline chars.  This oddity performs that function.
-    options.ca = process.env.CA_FILE.split('\n').join('\n');
-  }
-
   return new Promise((accept, reject) => {
     const req = https.request(options, (resp) => {
       let data = '';
@@ -58,7 +52,7 @@ exports.handler = async (event) => {
 function generateOptionsWithAuthHeader(username, password) {
   const authHeader =
     Buffer.from(`${username}:${password}`).toString('base64');
-  return {
+  const options = {
     hostname: process.env.OAUTH_SERVER_HOST,
     port: process.env.OAUTH_SERVER_PORT,
     path: process.env.OAUTH_SERVER_PATH,
@@ -69,6 +63,14 @@ function generateOptionsWithAuthHeader(username, password) {
       'X-Forwarded-Host': process.env.FORWARDED_HOST || 'testing.icaredata.org',
     },
   };
+
+  if (process.env.CA_FILE) {
+    // the mulitline ca file with contain \n characters which will need to be
+    // changed back into actual newline chars.  This oddity performs that function.
+    options.ca = [process.env.CA_FILE.split('\n').join('\n')];
+  }
+
+  return options;
 }
 
 /**

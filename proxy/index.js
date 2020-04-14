@@ -30,17 +30,19 @@ function generateOptions(params) {
       'X-Forwarded-Host': process.env.FORWARDED_HOST || 'testing.icaredata.org',
     },
   };
+
+  if (process.env.CA_FILE) {
+    // the mulitline ca file with contain \n characters which will need to be
+    // changed back into actual newline chars.  This oddity performs that function.
+    options.ca = [process.env.CA_FILE.split('\n').join('\n')];
+  }
+
   return options;
 };
 
 exports.handler = async (event) => {
   const options = generateOptions(event.queryStringParameters);
 
-  if (process.env.CA_FILE) {
-    // the mulitline ca file with contain \n characters which will need to be
-    // changed back into actual newline chars.  This oddity performs that function.
-    options.ca = process.env.CA_FILE.split('\n').join('\n');
-  }
 
   return new Promise((accept, reject) => {
     const req = https.request(options, (resp) => {
