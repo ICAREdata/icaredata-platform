@@ -2,9 +2,6 @@ const https = require('https');
 const querystring = require('querystring');
 const {getSecret} = require('../utils/getSecret.js');
 
-// TODO: remove this and get the server a proper certificate
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
 exports.handler = async (event) => {
   const secret = await getSecret('Keycloak-Authorizer');
   const options = generateOptionsWithAuthHeader(secret.username, secret.password);
@@ -55,7 +52,7 @@ exports.handler = async (event) => {
 function generateOptionsWithAuthHeader(username, password) {
   const authHeader =
     Buffer.from(`${username}:${password}`).toString('base64');
-  return {
+  const options = {
     hostname: process.env.OAUTH_SERVER_HOST,
     port: process.env.OAUTH_SERVER_PORT,
     path: process.env.OAUTH_SERVER_PATH,
@@ -63,9 +60,17 @@ function generateOptionsWithAuthHeader(username, password) {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
       'Authorization': `Basic ${authHeader}`,
-      'X-Forwarded-Host': 'testing.icaredata.org',
+      'X-Forwarded-Host': process.env.FORWARDED_HOST || 'testing.icaredata.org',
     },
   };
+
+  if (process.env.CA_FILE) {
+    // the mulitline ca file with contain \n characters which will need to be
+    // changed back into actual newline chars.  This oddity performs that function.
+    options.ca = [process.env.CA_FILE.split('\n').join('\n')];
+  }
+
+  return options;
 }
 
 /**

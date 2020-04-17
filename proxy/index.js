@@ -1,7 +1,6 @@
 const https = require('https');
 const querystring = require('querystring');
 const _ = require('lodash');
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 /**
  * Generate a url joining env-specific server path and provided params
@@ -28,14 +27,22 @@ function generateOptions(params) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-      'X-Forwarded-Host': 'testing.icaredata.org',
+      'X-Forwarded-Host': process.env.FORWARDED_HOST || 'testing.icaredata.org',
     },
   };
+
+  if (process.env.CA_FILE) {
+    // the mulitline ca file with contain \n characters which will need to be
+    // changed back into actual newline chars.  This oddity performs that function.
+    options.ca = [process.env.CA_FILE.split('\n').join('\n')];
+  }
+
   return options;
 };
 
 exports.handler = async (event) => {
   const options = generateOptions(event.queryStringParameters);
+
 
   return new Promise((accept, reject) => {
     const req = https.request(options, (resp) => {
