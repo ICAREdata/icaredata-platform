@@ -198,7 +198,8 @@ exports.handler = async () => {
             .then(async () => {
               const s3Password = await getSecret('S3-Zip-Password');
               const archive = encryptZip(stream, s3Password.password);
-              await saveToS3(archive, 'icaredata-dev-extracted-data');
+              const bucketName = process.env.S3_BUCKET || 'icaredata-dev-extracted-data';
+              await saveToS3(archive, bucketName);
               return responses.response200;
             })
             .catch((e) => {
