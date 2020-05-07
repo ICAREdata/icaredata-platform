@@ -5,7 +5,7 @@ const conformanceStatement = {
   'experimental': true,
   'date': '2019-10-29',
   'kind': 'capability',
-  'fhirVersion': '1.0.2',
+  'fhirVersion': '4.0.0',
   'acceptUnknown': 'no',
   'format': [
     'application/json+fhir',
@@ -13,5 +13,5 @@ const conformanceStatement = {
 };
 
 exports.handler = async () => {
-  return JSON.stringify(conformanceStatement);
+  return conformanceStatement;
 };
