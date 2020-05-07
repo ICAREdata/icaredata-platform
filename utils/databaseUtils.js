@@ -3,6 +3,7 @@ const {getSecret} = require('./getSecret');
 
 const getDatabaseConfiguration = async (login) => {
   const secret = await getSecret(login);
+  const caFileName = process.env.CA_FILE_NAME || 'rds-ca-2019-root.pem';
   return {
     client: 'pg',
     connection: {
@@ -13,7 +14,7 @@ const getDatabaseConfiguration = async (login) => {
       password: secret.password || '',
       ssl: {
         rejectUnauthorized: true,
-        ca: fs.readFileSync(__dirname + '/rds-ca-2019-root.pem'),
+        ca: fs.readFileSync(__dirname + `/${caFileName}`),
       },
     },
   };
