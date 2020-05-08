@@ -1,59 +1,120 @@
+const {v4} = require('uuid');
+
 module.exports = {
-  response200: JSON.stringify({
-    resourceType: 'Bundle',
-    id: 'ok',
-    type: 'message',
-    entry: [
-      {
-        resource: {
-          resourceType: 'MessageHeader',
-          event: {
-            system: 'urn:ICAREdataStudy',
-            code: 'ICAREdataReport',
-            display: 'ICAREdata report',
-          },
-          source: {
-            name: 'ICAREdata',
-            endpoint: 'https://testing.icaredata.org/$process-message',
-          },
-        },
-      },
-    ],
-  }),
-  response400: (errorMessage) => { // Takes a message argument
+  response200: (originalMessageId) => {
+    const bundleId = v4();
+    const messageHeaderId = v4();
+    const messageTimeStamp = (new Date()).toISOString();
     return JSON.stringify({
-      resourceType: 'OperationOutcome',
-      id: 'error',
-      text: {
-        status: 'additional',
-        div: `<div>\n      <p>${errorMessage}</p>\n    </div>`,
-      },
-      issue: [
+      resourceType: 'Bundle',
+      id: bundleId,
+      type: 'message',
+      entry: [
         {
-          severity: 'error',
-          code: 'exception',
-          details: {
-            text: errorMessage,
+          fullUrl: `urn:uuid:${messageHeaderId}`,
+          resource: {
+            resourceType: 'MessageHeader',
+            id: messageHeaderId,
+            timestamp: messageTimeStamp,
+            event: {
+              system: 'urn:ICAREdataStudy',
+              code: 'icare-data-submission',
+            },
+            response: {
+              identifier: originalMessageId,
+              code: 'ok',
+            },
           },
         },
       ],
     });
   },
-  response500: JSON.stringify({
-    resourceType: 'OperationOutcome',
-    id: 'fatal',
-    text: {
-      status: 'additional',
-      div: '<div>\n      <p>Internal Server Error</p>\n    </div>',
-    },
-    issue: [
-      {
-        severity: 'fatal',
-        code: 'exception',
-        details: {
-          text: 'Internal Server Error',
+  response400: (originalMessageId, errorMessage) => { // Takes a message argument
+    const bundleId = v4();
+    const messageHeaderId = v4();
+    const messageTimeStamp = (new Date()).toISOString();
+    const operationOutcomeId = v4();
+    return JSON.stringify({
+      resourceType: 'Bundle',
+      id: bundleId,
+      type: 'message',
+      entry: [
+        {
+          fullUrl: `urn:uuid:${messageHeaderId}`,
+          resource: {
+            resourceType: 'MessageHeader',
+            id: messageHeaderId,
+            timestamp: messageTimeStamp,
+            event: {
+              system: 'urn:ICAREdataStudy',
+              code: 'icare-data-submission',
+            },
+            response: {
+              identifier: originalMessageId,
+              code: 'fatal-error',
+              reference: `OperationOutcome/${operationOutcomeId}`,
+            },
+          },
         },
-      },
-    ],
-  }),
+        {
+          fullUrl: `urn:uuid:${operationOutcomeId}`,
+          resource: {
+            resourceType: 'OperationOutcome',
+            id: `urn:uuid:${operationOutcomeId}`,
+            issue: {
+              severity: 'fatal-error',
+              code: 'required',
+              details: {
+                text: errorMessage,
+              },
+            },
+          },
+        },
+      ],
+    });
+  },
+  response500: (originalMessageId) => {
+    const bundleId = v4();
+    const messageHeaderId = v4();
+    const messageTimeStamp = (new Date()).toISOString();
+    const operationOutcomeId = v4();
+    return JSON.stringify({
+      resourceType: 'Bundle',
+      id: bundleId,
+      type: 'message',
+      entry: [
+        {
+          fullUrl: `urn:uuid:${messageHeaderId}`,
+          resource: {
+            resourceType: 'MessageHeader',
+            id: messageHeaderId,
+            timestamp: messageTimeStamp,
+            event: {
+              system: 'urn:ICAREdataStudy',
+              code: 'icare-data-submission',
+            },
+            response: {
+              identifier: originalMessageId,
+              code: 'fatal-error',
+              reference: `OperationOutcome/${operationOutcomeId}`,
+            },
+          },
+        },
+        {
+          fullUrl: `urn:uuid:${operationOutcomeId}`,
+          resource: {
+            resourceType: 'OperationOutcome',
+            id: `urn:uuid:${operationOutcomeId}`,
+            issue: {
+              severity: 'fatal-error',
+              code: 'required',
+              details: {
+                text: 'Internal Server Error',
+              },
+            },
+          },
+        },
+      ],
+    });
+  },
 };

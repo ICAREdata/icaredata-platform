@@ -22,8 +22,29 @@ exports.handler = async (bundle, context, callback) => {
   const databaseConfig = await getDatabaseConfiguration('Lambda-RDS-Login');
   const dbConnection = knex(databaseConfig);
 
+  // Since bundleId is needed for the response error, we'll check that first
+  try {
+    // Have to wrap in try-catch since the fhirpath eval might fail
+    const bundleId = getBundleId(bundle);
+    if (!bundleId) {
+      callback(responses.response400(
+          'no-id-found',
+          'Request body does not contain a valid Bundle ID.',
+      ));
+      return;
+    }
+  } catch (error) {
+    callback(responses.response400(
+        'no-id-found',
+        'Request body does not contain a valid Bundle ID.',
+    ));
+    return;
+  }
+  const bundleId = getBundleId(bundle);
+
   if (!isValidFHIRBundle(bundle)) {
     callback(responses.response400(
+        bundleId,
         'Request body is not a valid FHIR R4 Bundle.',
     ));
     return;
@@ -32,6 +53,7 @@ exports.handler = async (bundle, context, callback) => {
 
   if (!isMessageBundle(bundle)) {
     callback(responses.response400(
+        bundleId,
         'FHIR Bundle is not a Message.',
     ));
     return;
@@ -41,6 +63,7 @@ exports.handler = async (bundle, context, callback) => {
   const messageHeader = getBundleResourcesByType(bundle, 'MessageHeader', {}, true);
   if (!messageHeader) {
     callback(responses.response400(
+        bundleId,
         'Message does not contain MessageHeader.',
     ));
     return;
@@ -49,6 +72,7 @@ exports.handler = async (bundle, context, callback) => {
   const containedBundle = getBundleResourcesByType(bundle, 'Bundle', {}, true);
   if (!containedBundle) {
     callback(responses.response400(
+        bundleId,
         'Message does not contain Bundle.',
     ));
     return;
@@ -58,6 +82,7 @@ exports.handler = async (bundle, context, callback) => {
   const researchSubject = getBundleResourcesByType(containedBundle, 'ResearchSubject', {}, true);
   if (!researchSubject) {
     callback(responses.response400(
+        bundleId,
         'ContainedBundle does not contain ResearchSubject.',
     ));
     return;
@@ -65,6 +90,7 @@ exports.handler = async (bundle, context, callback) => {
   const researchStudy = getBundleResourcesByType(containedBundle, 'ResearchStudy', {}, true);
   if (!researchStudy) {
     callback(responses.response400(
+        bundleId,
         'ContainedBundle does not contain ResearchStudy.',
     ));
     return;
@@ -72,14 +98,14 @@ exports.handler = async (bundle, context, callback) => {
   console.log('Collected ResearchSubject and ResearchStudy.');
 
   // Collect all information that we want to store in the database
-  // from the resources
-  const bundleId = getBundleId(bundle);
+  // from the resources - bundleId was collected earlier
   const subjectId = getSubjectId(researchSubject);
   const siteId = getSiteId(messageHeader);
   const trialId = getTrialId(researchStudy);
   const hasInfo = (bundleId && subjectId && trialId); // siteId not required
   if (!hasInfo) {
     callback(responses.response400(
+        bundleId,
         'Message resources do not contain all required data.',
     ));
     return;
@@ -102,7 +128,7 @@ exports.handler = async (bundle, context, callback) => {
       .into('data.messages')
       .then((r) => {
         console.log('Data inserted into database.');
-        return responses.response200;
+        return responses.response200(bundleId);
       })
       .catch((e) => {
         console.log(e);
@@ -122,15 +148,15 @@ exports.handler = async (bundle, context, callback) => {
           };
           const violation =
             violationMap[e.code] || 'Integrity Constraint Violation';
-          return responses.response400(violation);
+          return responses.response400(bundleId, violation);
         } else {
           // Throw a 500 Internal Server Error for any other error
-          return responses.response500;
+          return responses.response500(bundleId);
         }
       });
   dbConnection.destroy();
 
-  if (response === responses.response200) {
+  if (response === responses.response200(bundleId)) {
     return response;
   }
   callback(response);
