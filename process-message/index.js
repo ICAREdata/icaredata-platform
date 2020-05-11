@@ -23,24 +23,14 @@ exports.handler = async (bundle, context, callback) => {
   const dbConnection = knex(databaseConfig);
 
   // Since bundleId is needed for the response error, we'll check that first
-  try {
-    // Have to wrap in try-catch since the fhirpath eval might fail
-    const bundleId = getBundleId(bundle);
-    if (!bundleId) {
-      callback(responses.response400(
-          'no-id-found',
-          'Request body does not contain a valid Bundle ID.',
-      ));
-      return;
-    }
-  } catch (error) {
+  const bundleId = getBundleId(bundle);
+  if (!bundleId) {
     callback(responses.response400(
         'no-id-found',
         'Request body does not contain a valid Bundle ID.',
     ));
     return;
   }
-  const bundleId = getBundleId(bundle);
 
   if (!isValidFHIRBundle(bundle)) {
     callback(responses.response400(
