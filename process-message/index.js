@@ -1,5 +1,5 @@
 const {getDatabaseConfiguration} = require('../utils/databaseUtils');
-const responses = require('../utils/responses.js');
+const responses = require('../utils/submissionResponses.js');
 const {getBundleResourcesByType} = require('../utils/fhirUtils');
 const schema = require('../utils/fhir.schema.json');
 const fhirpath = require('fhirpath');
