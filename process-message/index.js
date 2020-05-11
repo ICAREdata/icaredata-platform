@@ -17,6 +17,8 @@ const getBundleId = (bundle) => fhirpath.evaluate(bundle, 'Bundle.id')[0];
 const getSubjectId = (subject) => fhirpath.evaluate(subject, 'ResearchSubject.identifier.first().value')[0];
 const getSiteId = (messageHeader) => fhirpath.evaluate(messageHeader, 'MessageHeader.source.endpoint')[0];
 const getTrialId = (study) => fhirpath.evaluate(study, 'ResearchStudy.identifier.first().value')[0];
+// Responses are stringified JSON objs; have to parse first
+const getResponseCode = (response) => fhirpath.evaluate(JSON.parse(response), 'Bundle.entry[0].resource.response.code')[0];
 
 exports.handler = async (bundle, context, callback) => {
   const databaseConfig = await getDatabaseConfiguration('Lambda-RDS-Login');
@@ -146,7 +148,7 @@ exports.handler = async (bundle, context, callback) => {
       });
   dbConnection.destroy();
 
-  if (response === responses.response200(bundleId)) {
+  if (getResponseCode(response) === 'ok') {
     return response;
   }
   callback(response);
