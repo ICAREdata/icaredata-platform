@@ -62,7 +62,7 @@ module.exports = {
             resourceType: 'OperationOutcome',
             id: `urn:uuid:${operationOutcomeId}`,
             issue: {
-              severity: 'fatal-error',
+              severity: 'error',
               code: 'required',
               details: {
                 text: errorMessage,
@@ -106,7 +106,7 @@ module.exports = {
             resourceType: 'OperationOutcome',
             id: `urn:uuid:${operationOutcomeId}`,
             issue: {
-              severity: 'fatal-error',
+              severity: 'fatal',
               code: 'required',
               details: {
                 text: 'Internal Server Error',
