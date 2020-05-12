@@ -1,7 +1,6 @@
 const {getSecret} = require('../utils/getSecret.js');
 const {saveToS3} = require('../utils/saveToS3.js');
 const {getDatabaseConfiguration} = require('../utils/databaseUtils');
-const responses = require('../utils/responses.js');
 const {getBundleResourcesByType, getExtensionByUrl} = require('../utils/fhirUtils');
 const {getCancerType} = require('../utils/conditionUtils');
 const exceljs = require('exceljs');
@@ -200,16 +199,25 @@ exports.handler = async () => {
               const archive = encryptZip(stream, s3Password.password);
               const bucketName = process.env.S3_BUCKET || 'icaredata-dev-extracted-data';
               await saveToS3(archive, bucketName);
-              return responses.response200;
+              return JSON.stringify({
+                status: '200',
+                statusText: 'Data successfully extracted',
+              });
             })
             .catch((e) => {
               console.log(e);
-              return responses.response500;
+              return JSON.stringify({
+                status: '500',
+                statusText: 'Internal Server Error',
+              });
             });
       })
       .catch((e) => {
         console.log(e);
-        return responses.response500;
+        return JSON.stringify({
+          status: '500',
+          statusText: 'Internal Server Error',
+        });
       });
 
   dbConnection.destroy();
