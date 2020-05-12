@@ -52,7 +52,9 @@ module.exports = {
             response: {
               identifier: originalMessageId,
               code: 'fatal-error',
-              reference: `OperationOutcome/${operationOutcomeId}`,
+              details: {
+                reference: `OperationOutcome/${operationOutcomeId}`,
+              },
             },
           },
         },
