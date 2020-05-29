@@ -81,7 +81,7 @@ NODE_TLS_REJECT_UNAUTHORIZED | A Node environment variable to set to disable str
 OAUTH_SERVER_HOST | The host URL for the OAuth server used for authorization.
 OAUTH_SERVER_PATH | The path following the host URL for the OAuth server used for authorization.
 OAUTH_SERVER_PORT | The port to connect to the OAuth server at its endpoint.
-REGION | The AWS region in which the infrastructure is located.
+REGION | The AWS region in which the infrastructure is located. Used in `utils/getSecret.js`.
 
 ### Keycloak Proxy Lambda
 
@@ -98,21 +98,21 @@ OAUTH_SERVER_PORT | The port to connect to the OAuth server at its endpoint.
 
 Command | Effect
 --- | ---
-CA_FILE_NAME | The file name of the CA file to use for SSL connection to the RDS resource in AWS.
-DATABASE_HOST | The host URL for the RDS resource in AWS.
-DATABASE_NAME | The name of the database in the RDS resource to connect to.
-DATABASE_PORT | The port to connect to the RDS resource in AWS.
-REGION | The AWS region in which the infrastructure is located.
+CA_FILE_NAME | The file name of the CA file to use for SSL connection to the RDS resource in AWS. Used in `utils/databaseUtils.js`.
+DATABASE_HOST | The host URL for the RDS resource in AWS. Used in `utils/databaseUtils.js`.
+DATABASE_NAME | The name of the database in the RDS resource to connect to. Used in `utils/databaseUtils.js`.
+DATABASE_PORT | The port to connect to the RDS resource in AWS. Used in `utils/databaseUtils.js`.
+REGION | The AWS region in which the infrastructure is located. Used in `utils/getSecret.js`.
 
 ### Data Extraction Lambda
 
 Command | Effect
 --- | ---
-CA_FILE_NAME | The file name of the CA file to use for SSL connection to the RDS resource in AWS.
-DATABASE_HOST | The host URL for the RDS resource in AWS.
-DATABASE_NAME | The name of the database in the RDS resource to connect to.
-DATABASE_PORT | The port to connect to the RDS resource in AWS.
-REGION | The AWS region in which the infrastructure is located.
+CA_FILE_NAME | The file name of the CA file to use for SSL connection to the RDS resource in AWS. Used in `utils/databaseUtils.js`.
+DATABASE_HOST | The host URL for the RDS resource in AWS. Used in `utils/databaseUtils.js`.
+DATABASE_NAME | The name of the database in the RDS resource to connect to. Used in `utils/databaseUtils.js`.
+DATABASE_PORT | The port to connect to the RDS resource in AWS. Used in `utils/databaseUtils.js`.
+REGION | The AWS region in which the infrastructure is located. Used in `utils/getSecret.js`.
 S3_BUCKET | The name of the AWS S3 bucket in which to place the extracted data.
 
 # License
