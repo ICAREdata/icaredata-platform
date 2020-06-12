@@ -149,7 +149,7 @@ exports.handler = async (bundle, context, callback) => {
   dbConnection.destroy();
 
   if (getResponseCode(response) === 'ok') {
-    return response;
+    callback(null, response);
   }
   callback(response);
 };
