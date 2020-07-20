@@ -65,7 +65,7 @@ describe('Process Message', () => {
   describe('fhirpath queries', () => {
     const exampleBundleId = '10bb101f-a121-4264-a920-67be9cb82c74';
     const exampleSubjectId = '123';
-    const exampleSiteId = 'http://icaredata.org/submission-client';
+    const exampleSiteId = '456';
     const exampleTrialId = 'AFT1235';
     const bundle = getBundleResourcesByType(exampleMessage, 'Bundle', {}, true);
 

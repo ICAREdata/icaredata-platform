@@ -167,8 +167,15 @@ const connectToDB = async () => {
   return knex(databaseConfig);
 };
 
-const getData = async (dbConnection) => {
-  return await dbConnection('data.messages').select('*');
+const getData = async (dbConnection, siteId) => {
+  let data;
+  if (siteId) {
+    data = await dbConnection('data.messages').where('site_id', siteId);
+  } else {
+    data = await dbConnection('data.messages').select('*');
+  }
+  console.log(`Collected data for ${data.length} bundles.`);
+  return data;
 };
 
 const encryptZip = (stream, password) => {
@@ -184,11 +191,11 @@ const encryptZip = (stream, password) => {
   return archive;
 };
 
-exports.handler = async () => {
+exports.handler = async (event) => {
   const dbConnection = await connectToDB();
   const workbook = createIcareWorkbook();
   const stream = new Stream.PassThrough();
-  const response = await getData(dbConnection)
+  const response = await getData(dbConnection, event.siteId)
       .then(async (data) => {
         processData(data, workbook);
 
