@@ -64,12 +64,21 @@ const getDiseaseStatusResources = (bundle) => {
 // Retrieves condition resource by looking at id on reference
 const getConditionFromReference = (bundle, refArray) => {
   if (!(refArray && (refArray.length > 0))) return;
+  const reference = refArray[0];
   return getBundleResourcesByType(
       bundle,
       'Condition',
       {},
       false,
-  ).find((r) => r.id === refArray[0].split('/')[1]);
+  ).find((r) => {
+    if (reference.startsWith('urn:uuid:')) {
+      return r.id === reference.split(':')[2];
+    } else if (reference.includes('/')) {
+      return r.id === reference.split('/')[1];
+    } else {
+      return;
+    }
+  });
 };
 
 // Add Disease Status Resource to worksheet
@@ -119,7 +128,7 @@ const addCarePlanDataToWorksheet = (bundle, worksheet, trialData) => {
     const effectiveDate = reviewDate ? reviewDate.valueDate : '';
     const carePlanChangeReason = getExtensionByUrl(
       fhirpath.evaluate(resource, 'CarePlan.extension[0].extension'),
-      'CarePlanChangedReason',
+      'CarePlanChangeReason',
     );
     const changedFlag = getExtensionByUrl(
       fhirpath.evaluate(resource, 'CarePlan.extension[0].extension'),
