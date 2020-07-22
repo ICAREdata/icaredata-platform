@@ -95,7 +95,7 @@ describe('Extraction', () => {
 
     expectedTpRow = {
       effectiveDate: '2020-02-23',
-      codeValue: 'not evaluated',
+      codeValue: '',
       subjectId: 'subjectId2',
       trialId: 'trialId2',
       siteId: 'siteId2',
