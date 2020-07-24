@@ -16,11 +16,19 @@ const getBundleResourcesByType = (message, type, context = {}, first) => {
   }
 };
 
-const getExtensionByUrl = (extArr, url) => {
-  return extArr ? extArr.find((e) => e.url === url) : undefined;
+// Utility function to get the extensions on an array of extension by url
+// Optionally get only the first extension of that url via 'first' parameter
+const getExtensionsByUrl = (extArr, url, first) => {
+  const extensions = extArr ? extArr.filter((e) => e.url === url) : [];
+
+  if (extensions.length > 0) {
+    return first ? extensions[0] : extensions;
+  } else {
+    return first ? null : [];
+  }
 };
 
 module.exports = {
   getBundleResourcesByType,
-  getExtensionByUrl,
+  getExtensionsByUrl,
 };

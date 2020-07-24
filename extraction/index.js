@@ -1,7 +1,7 @@
 const {getSecret} = require('../utils/getSecret.js');
 const {saveToS3} = require('../utils/saveToS3.js');
 const {getDatabaseConfiguration} = require('../utils/databaseUtils');
-const {getBundleResourcesByType, getExtensionByUrl} = require('../utils/fhirUtils');
+const {getBundleResourcesByType, getExtensionsByUrl} = require('../utils/fhirUtils');
 const {getCancerType} = require('../utils/conditionUtils');
 const exceljs = require('exceljs');
 const Stream = require('stream');
@@ -46,7 +46,7 @@ const createIcareWorkbook = () => {
 // Translates `codeObject` into a format(codeSystem : code) to be input into spreadsheet
 // If there are multiple codes, will join them and delimit with |
 const translateCode = (codeObject) => {
-  return codeObject.coding ?
+  return (codeObject && codeObject.coding) ?
     codeObject.coding.map((c) => `${c.system} : ${c.code}`).join(' | ') :
     '';
 };
@@ -85,19 +85,19 @@ const getConditionFromReference = (bundle, refArray) => {
 const addDiseaseStatusDataToWorksheet = (bundle, worksheet, trialData) => {
   const dsResources = getDiseaseStatusResources(bundle);
   dsResources.forEach((resource) => {
-    const evidenceExtension = getExtensionByUrl(
-      fhirpath.evaluate(resource, 'Observation.extension'),
-      'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-evidence-type',
+    const evidenceExtensions = getExtensionsByUrl(
+        fhirpath.evaluate(resource, 'Observation.extension'),
+        'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-evidence-type',
     );
 
     // Joins the array of evidence items
-    const evidence = evidenceExtension ?
-      translateCode(evidenceExtension.valueCodeableConcept) :
-      '';
+    const evidence = evidenceExtensions.map((extension) => {
+      return translateCode(extension.valueCodeableConcept);
+    }).filter((evidence) => evidence).join(' | ');
 
     const condition = getConditionFromReference(
-      bundle,
-      fhirpath.evaluate(resource, 'Observation.focus[0].reference'),
+        bundle,
+        fhirpath.evaluate(resource, 'Observation.focus[0].reference'),
     );
 
     worksheet.addRow({
@@ -121,22 +121,25 @@ const addCarePlanDataToWorksheet = (bundle, worksheet, trialData) => {
       false,
   );
   carePlanResources.forEach((resource) => {
-    const reviewDate = getExtensionByUrl(
-      fhirpath.evaluate(resource, 'CarePlan.extension[0].extension'),
-      'ReviewDate',
+    const reviewDate = getExtensionsByUrl(
+        fhirpath.evaluate(resource, 'CarePlan.extension[0].extension'),
+        'ReviewDate',
+        true,
     );
     const effectiveDate = reviewDate ? reviewDate.valueDate : '';
-    const carePlanChangeReason = getExtensionByUrl(
-      fhirpath.evaluate(resource, 'CarePlan.extension[0].extension'),
-      'CarePlanChangeReason',
+    const carePlanChangeReason = getExtensionsByUrl(
+        fhirpath.evaluate(resource, 'CarePlan.extension[0].extension'),
+        'CarePlanChangeReason',
+        true,
     );
-    const changedFlag = getExtensionByUrl(
-      fhirpath.evaluate(resource, 'CarePlan.extension[0].extension'),
-      'ChangedFlag',
+    const changedFlag = getExtensionsByUrl(
+        fhirpath.evaluate(resource, 'CarePlan.extension[0].extension'),
+        'ChangedFlag',
+        true,
     );
     const codeValue = changedFlag.valueBoolean && carePlanChangeReason ?
-    translateCode(carePlanChangeReason.valueCodeableConcept) :
-    '';
+      translateCode(carePlanChangeReason.valueCodeableConcept) :
+      '';
 
     worksheet.addRow({
       ...trialData,
