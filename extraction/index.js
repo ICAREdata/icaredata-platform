@@ -72,9 +72,11 @@ const getConditionFromReference = (bundle, refArray) => {
       false,
   ).find((r) => {
     if (reference.startsWith('urn:uuid:')) {
-      return r.id === reference.split(':')[2];
+      const referenceId = reference.split(':')[2];
+      return r.id === referenceId || (r.identifier && r.identifier.some(id => id.value === referenceId));
     } else if (reference.includes('/')) {
-      return r.id === reference.split('/')[1];
+      const referenceId = reference.split('/')[1];
+      return r.id === referenceId || (r.identifier && r.identifier.some(id => id.value === referenceId));;
     } else {
       return;
     }
