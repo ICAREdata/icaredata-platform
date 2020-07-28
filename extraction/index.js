@@ -1,7 +1,11 @@
 const {getSecret} = require('../utils/getSecret.js');
 const {saveToS3} = require('../utils/saveToS3.js');
 const {getDatabaseConfiguration} = require('../utils/databaseUtils');
-const {getBundleResourcesByType, getExtensionsByUrl} = require('../utils/fhirUtils');
+const {
+  getBundleResourcesByType,
+  getExtensionsByUrl,
+  doResourceAndReferenceIdsMatch,
+} = require('../utils/fhirUtils');
 const {getCancerType} = require('../utils/conditionUtils');
 const exceljs = require('exceljs');
 const Stream = require('stream');
@@ -61,26 +65,16 @@ const getDiseaseStatusResources = (bundle) => {
   ).filter((r) => r.code && r.code.coding.some((c) => c.system === 'http://loinc.org' && c.code === '88040-1'));
 };
 
-// Retrieves condition resource by looking at id on reference
-const getConditionFromReference = (bundle, refArray) => {
-  if (!(refArray && (refArray.length > 0))) return;
-  const reference = refArray[0];
+// Retrieves condition resource by looking at ids and identifiers on focus reference
+const getConditionFromFocusReference = (bundle, focuses) => {
+  if (!(focuses && (focuses.length > 0))) return;
+  const references = focuses.map((f) => f.reference).filter((f) => f);
   return getBundleResourcesByType(
       bundle,
       'Condition',
       {},
       false,
-  ).find((r) => {
-    if (reference.startsWith('urn:uuid:')) {
-      const referenceId = reference.split(':')[2];
-      return r.id === referenceId || (r.identifier && r.identifier.some(id => id.value === referenceId));
-    } else if (reference.includes('/')) {
-      const referenceId = reference.split('/')[1];
-      return r.id === referenceId || (r.identifier && r.identifier.some(id => id.value === referenceId));;
-    } else {
-      return;
-    }
-  });
+  ).find((resource) => references.some((reference) => doResourceAndReferenceIdsMatch(resource, reference)));
 };
 
 // Add Disease Status Resource to worksheet
@@ -97,9 +91,9 @@ const addDiseaseStatusDataToWorksheet = (bundle, worksheet, trialData) => {
       return translateCode(extension.valueCodeableConcept);
     }).filter((evidence) => evidence).join(' | ');
 
-    const condition = getConditionFromReference(
+    const condition = getConditionFromFocusReference(
         bundle,
-        fhirpath.evaluate(resource, 'Observation.focus[0].reference'),
+        fhirpath.evaluate(resource, 'Observation.focus'),
     );
 
     worksheet.addRow({
@@ -123,22 +117,16 @@ const addCarePlanDataToWorksheet = (bundle, worksheet, trialData) => {
       false,
   );
   carePlanResources.forEach((resource) => {
-    const reviewDate = getExtensionsByUrl(
-        fhirpath.evaluate(resource, 'CarePlan.extension[0].extension'),
-        'ReviewDate',
-        true,
+    const reviewExtensionUrl = 'http://mcodeinitiative.org/codex/us/icare/StructureDefinition/icare-care-plan-review';
+    const reviewExtension = fhirpath.evaluate(
+        resource,
+        `CarePlan.extension.where(url='${reviewExtensionUrl}').extension`,
     );
+
+    const reviewDate = getExtensionsByUrl(reviewExtension, 'ReviewDate', true);
     const effectiveDate = reviewDate ? reviewDate.valueDate : '';
-    const carePlanChangeReason = getExtensionsByUrl(
-        fhirpath.evaluate(resource, 'CarePlan.extension[0].extension'),
-        'CarePlanChangeReason',
-        true,
-    );
-    const changedFlag = getExtensionsByUrl(
-        fhirpath.evaluate(resource, 'CarePlan.extension[0].extension'),
-        'ChangedFlag',
-        true,
-    );
+    const carePlanChangeReason = getExtensionsByUrl(reviewExtension, 'CarePlanChangeReason', true);
+    const changedFlag = getExtensionsByUrl(reviewExtension, 'ChangedFlag', true);
     const codeValue = changedFlag.valueBoolean && carePlanChangeReason ?
       translateCode(carePlanChangeReason.valueCodeableConcept) :
       '';
