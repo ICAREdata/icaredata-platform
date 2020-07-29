@@ -38,6 +38,7 @@ const createIcareWorkbook = () => {
   );
   treatmentPlanChangeWorksheet.columns = [
     {header: 'Effective Date', key: 'effectiveDate', width: 30},
+    {header: 'Changed Flag', key: 'changedFlag', width: 30},
     {header: 'Code Value', key: 'codeValue', width: 30},
     {header: 'Subject ID', key: 'subjectId', width: 30},
     {header: 'Trial ID', key: 'trialId', width: 30},
@@ -134,6 +135,7 @@ const addCarePlanDataToWorksheet = (bundle, worksheet, trialData) => {
     worksheet.addRow({
       ...trialData,
       effectiveDate,
+      changedFlag: (changedFlag.valueBoolean != null) ? `${changedFlag.valueBoolean}` : '',
       codeValue,
     });
   });
