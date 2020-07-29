@@ -1,12 +1,17 @@
 const {getSecret} = require('../utils/getSecret.js');
 const {saveToS3} = require('../utils/saveToS3.js');
 const {getDatabaseConfiguration} = require('../utils/databaseUtils');
-const {getBundleResourcesByType, getExtensionByUrl} = require('../utils/fhirUtils');
+const {
+  getBundleResourcesByType,
+  getExtensionsByUrl,
+  doResourceAndReferenceIdsMatch,
+} = require('../utils/fhirUtils');
 const {getCancerType} = require('../utils/conditionUtils');
 const exceljs = require('exceljs');
 const Stream = require('stream');
 const archiver = require('archiver');
 const knex = require('knex');
+const fhirpath = require('fhirpath');
 archiver.registerFormat('zip-encrypted', require('archiver-zip-encrypted'));
 
 // Creates excel workbook with Disease Status and Treatment Plan Change Worksheets
@@ -33,6 +38,7 @@ const createIcareWorkbook = () => {
   );
   treatmentPlanChangeWorksheet.columns = [
     {header: 'Effective Date', key: 'effectiveDate', width: 30},
+    {header: 'Changed Flag', key: 'changedFlag', width: 30},
     {header: 'Code Value', key: 'codeValue', width: 30},
     {header: 'Subject ID', key: 'subjectId', width: 30},
     {header: 'Trial ID', key: 'trialId', width: 30},
@@ -45,7 +51,7 @@ const createIcareWorkbook = () => {
 // Translates `codeObject` into a format(codeSystem : code) to be input into spreadsheet
 // If there are multiple codes, will join them and delimit with |
 const translateCode = (codeObject) => {
-  return codeObject.coding ?
+  return (codeObject && codeObject.coding) ?
     codeObject.coding.map((c) => `${c.system} : ${c.code}`).join(' | ') :
     '';
 };
@@ -60,37 +66,43 @@ const getDiseaseStatusResources = (bundle) => {
   ).filter((r) => r.code && r.code.coding.some((c) => c.system === 'http://loinc.org' && c.code === '88040-1'));
 };
 
-// Retrieves condition resource by looking at id on reference
-const getConditionFromReference = (bundle, reference) => {
+// Retrieves condition resource by looking at ids and identifiers on focus reference
+const getConditionFromFocusReference = (bundle, focuses) => {
+  if (!(focuses && (focuses.length > 0))) return;
+  const references = focuses.map((f) => f.reference).filter((f) => f);
   return getBundleResourcesByType(
       bundle,
       'Condition',
       {},
       false,
-  ).find((r) => r.id === reference.split('/')[1]);
+  ).find((resource) => references.some((reference) => doResourceAndReferenceIdsMatch(resource, reference)));
 };
 
 // Add Disease Status Resource to worksheet
 const addDiseaseStatusDataToWorksheet = (bundle, worksheet, trialData) => {
   const dsResources = getDiseaseStatusResources(bundle);
   dsResources.forEach((resource) => {
-    const evidenceExtension = getExtensionByUrl(
-        resource.extension,
+    const evidenceExtensions = getExtensionsByUrl(
+        fhirpath.evaluate(resource, 'Observation.extension'),
         'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-evidence-type',
     );
 
     // Joins the array of evidence items
-    const evidence = evidenceExtension ?
-      translateCode(evidenceExtension.valueCodeableConcept) :
-      '';
-    const condition = getConditionFromReference(bundle, resource.focus[0].reference);
+    const evidence = evidenceExtensions.map((extension) => {
+      return translateCode(extension.valueCodeableConcept);
+    }).filter((evidence) => evidence).join(' | ');
+
+    const condition = getConditionFromFocusReference(
+        bundle,
+        fhirpath.evaluate(resource, 'Observation.focus'),
+    );
 
     worksheet.addRow({
       ...trialData,
       evidence,
       effectiveDate: resource.effectiveDateTime,
-      cancerType: getCancerType(condition),
-      cancerCodeValue: translateCode(condition.code),
+      cancerType: condition ? getCancerType(condition) : '',
+      cancerCodeValue: condition ? translateCode(condition.code) : '',
       codeValue: translateCode(resource.valueCodeableConcept),
     });
   });
@@ -106,26 +118,24 @@ const addCarePlanDataToWorksheet = (bundle, worksheet, trialData) => {
       false,
   );
   carePlanResources.forEach((resource) => {
-    const reviewDate = getExtensionByUrl(
-        resource.extension[0].extension,
-        'ReviewDate',
+    const reviewExtensionUrl = 'http://mcodeinitiative.org/codex/us/icare/StructureDefinition/icare-care-plan-review';
+    const reviewExtension = fhirpath.evaluate(
+        resource,
+        `CarePlan.extension.where(url='${reviewExtensionUrl}').extension`,
     );
+
+    const reviewDate = getExtensionsByUrl(reviewExtension, 'ReviewDate', true);
     const effectiveDate = reviewDate ? reviewDate.valueDate : '';
-    const carePlanChangeReason = getExtensionByUrl(
-        resource.extension[0].extension,
-        'CarePlanChangedReason',
-    );
-    const changedFlag = getExtensionByUrl(
-        resource.extension[0].extension,
-        'ChangedFlag',
-    );
-    const codeValue = changedFlag.valueBoolean ?
-    translateCode(carePlanChangeReason.valueCodeableConcept) :
-    'not evaluated';
+    const carePlanChangeReason = getExtensionsByUrl(reviewExtension, 'CarePlanChangeReason', true);
+    const changedFlag = getExtensionsByUrl(reviewExtension, 'ChangedFlag', true);
+    const codeValue = changedFlag.valueBoolean && carePlanChangeReason ?
+      translateCode(carePlanChangeReason.valueCodeableConcept) :
+      '';
 
     worksheet.addRow({
       ...trialData,
       effectiveDate,
+      changedFlag: (changedFlag.valueBoolean != null) ? `${changedFlag.valueBoolean}` : '',
       codeValue,
     });
   });

@@ -75,7 +75,7 @@ describe('Extraction', () => {
       expect(diseaseStatusWorksheet.columnCount).to.equal(8);
       expect(diseaseStatusWorksheet.rowCount).to.equal(1);
       expect(treatmentPlanChangeWorksheet).to.exist;
-      expect(treatmentPlanChangeWorksheet.columnCount).to.equal(5);
+      expect(treatmentPlanChangeWorksheet.columnCount).to.equal(6);
       expect(treatmentPlanChangeWorksheet.rowCount).to.equal(1);
       expect(workbook.getWorksheet('Test Worksheet')).to.not.exist;
     });
@@ -95,7 +95,8 @@ describe('Extraction', () => {
 
     expectedTpRow = {
       effectiveDate: '2020-02-23',
-      codeValue: 'not evaluated',
+      changedFlag: 'false',
+      codeValue: '',
       subjectId: 'subjectId2',
       trialId: 'trialId2',
       siteId: 'siteId2',
@@ -120,6 +121,7 @@ describe('Extraction', () => {
       expect(treatmentPlanChangeWorksheet.rowCount).to.equal(3);
       const tpRow = treatmentPlanChangeWorksheet.getRow(3);
       expect(tpRow.getCell('effectiveDate').text).to.equal(expectedTpRow.effectiveDate);
+      expect(tpRow.getCell('changedFlag').text).to.equal(expectedTpRow.changedFlag);
       expect(tpRow.getCell('codeValue').text).to.equal(expectedTpRow.codeValue);
       expect(tpRow.getCell('subjectId').text).to.equal(expectedTpRow.subjectId);
       expect(tpRow.getCell('trialId').text).to.equal(expectedTpRow.trialId);
