@@ -130,8 +130,6 @@ const addCarePlanDataToWorksheet = (bundle, worksheet, trialData) => {
       false,
   );
   carePlanResources.forEach((resource) => {
-    const resourceId = fhirpath.evaluate(resource, 'CarePlan.id')[0];
-
     const reviewExtensionUrl = 'http://mcodeinitiative.org/codex/us/icare/StructureDefinition/icare-care-plan-review';
     const reviewExtension = fhirpath.evaluate(
         resource,
@@ -147,15 +145,15 @@ const addCarePlanDataToWorksheet = (bundle, worksheet, trialData) => {
       '';
 
     if (!reviewDate) {
-      console.log(`No ReviewDate was found on CarePlan ${resourceId} on Bundle ${bundleId}.`);
+      console.log(`No ReviewDate was found on Bundle ${bundleId}.`);
     }
 
     if (!changedFlag) {
-      console.log(`No ChangedFlag was found on CarePlan ${resourceId} on Bundle ${bundleId}.`);
+      console.log(`No ChangedFlag was found on Bundle ${bundleId}.`);
     }
 
     if (changedFlag && changedFlag.valueBoolean && !carePlanChangeReason) {
-      console.log(`No CarePlanChangeReason was found on CarePlan ${resourceId} on Bundle ${bundleId}.`);
+      console.log(`No CarePlanChangeReason was found on Bundle ${bundleId}.`);
     }
 
     worksheet.addRow({
