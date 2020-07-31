@@ -80,12 +80,18 @@ const getConditionFromFocusReference = (bundle, focuses) => {
 
 // Add Disease Status Resource to worksheet
 const addDiseaseStatusDataToWorksheet = (bundle, worksheet, trialData) => {
+  const bundleId = fhirpath.evaluate(bundle, 'Bundle.id')[0];
+
   const dsResources = getDiseaseStatusResources(bundle);
   dsResources.forEach((resource) => {
     const evidenceExtensions = getExtensionsByUrl(
         fhirpath.evaluate(resource, 'Observation.extension'),
         'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-evidence-type',
     );
+
+    if (evidenceExtensions.length === 0) {
+      console.log(`No evidence extensions were found on Bundle ${bundleId}.`);
+    }
 
     // Joins the array of evidence items
     const evidence = evidenceExtensions.map((extension) => {
@@ -96,6 +102,10 @@ const addDiseaseStatusDataToWorksheet = (bundle, worksheet, trialData) => {
         bundle,
         fhirpath.evaluate(resource, 'Observation.focus'),
     );
+
+    if (!condition) {
+      console.log(`No Condition was found by reference on Bundle ${bundleId}.`);
+    }
 
     worksheet.addRow({
       ...trialData,
@@ -110,6 +120,8 @@ const addDiseaseStatusDataToWorksheet = (bundle, worksheet, trialData) => {
 
 // Add Careplan resources to worksheet
 const addCarePlanDataToWorksheet = (bundle, worksheet, trialData) => {
+  const bundleId = fhirpath.evaluate(bundle, 'Bundle.id')[0];
+
   // Get CarePlan Resources and add data to worksheet
   const carePlanResources = getBundleResourcesByType(
       bundle,
@@ -131,6 +143,18 @@ const addCarePlanDataToWorksheet = (bundle, worksheet, trialData) => {
     const codeValue = changedFlag.valueBoolean && carePlanChangeReason ?
       translateCode(carePlanChangeReason.valueCodeableConcept) :
       '';
+
+    if (!reviewDate) {
+      console.log(`No ReviewDate was found on Bundle ${bundleId}.`);
+    }
+
+    if (!changedFlag) {
+      console.log(`No ChangedFlag was found on Bundle ${bundleId}.`);
+    }
+
+    if (changedFlag && changedFlag.valueBoolean && !carePlanChangeReason) {
+      console.log(`No CarePlanChangeReason was found on Bundle ${bundleId}.`);
+    }
 
     worksheet.addRow({
       ...trialData,
