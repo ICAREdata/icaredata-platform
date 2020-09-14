@@ -4,7 +4,7 @@ const capabilityStatement = {
   'version': '1.0.0',
   'status': 'active',
   'experimental': true,
-  'date': '2020-09-11',
+  'date': '2020-09-14',
   'kind': 'capability',
   'fhirVersion': '4.0.1',
   'format': [
