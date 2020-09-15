@@ -1,17 +1,17 @@
-const conformanceStatement = {
-  'resourceType': 'Conformance',
+const capabilityStatement = {
+  'resourceType': 'CapabilityStatement',
   'url': process.env.METADATA_URL || 'https://testing.icaredata.org/metadata',
-  'version': '0.0.0',
+  'version': '1.0.0',
+  'status': 'active',
   'experimental': true,
-  'date': '2019-10-29',
+  'date': '2020-09-14',
   'kind': 'capability',
-  'fhirVersion': '4.0.0',
-  'acceptUnknown': 'no',
+  'fhirVersion': '4.0.1',
   'format': [
     'application/json+fhir',
   ],
 };
 
 exports.handler = async () => {
-  return conformanceStatement;
+  return capabilityStatement;
 };
