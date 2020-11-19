@@ -14,6 +14,7 @@ const checkCodeInVS = (condition, valueSet) => {
   if (valueSet.expansion) {
     return coding.some((c) => {
       return valueSet.expansion.contains.some((containsItem) => {
+        if (!c || !containsItem) return false;
         return c.system === containsItem.system && c.code === containsItem.code;
       });
     });
@@ -22,7 +23,7 @@ const checkCodeInVS = (condition, valueSet) => {
   // Checks if code is in any of the valueSet.compose.include arrays
   return coding.some((c) => {
     return valueSet.compose.include.some((includeItem) => {
-      if (!includeItem.concept) return false;
+      if (!c || !includeItem || !includeItem.concept) return false;
       return c.system === includeItem.system &&
         includeItem.concept.map((concept) => concept.code).includes(c.code);
     });
