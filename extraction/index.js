@@ -52,7 +52,7 @@ const createIcareWorkbook = () => {
 // If there are multiple codes, will join them and delimit with |
 const translateCode = (codeObject) => {
   return (codeObject && codeObject.coding) ?
-    codeObject.coding.map((c) => `${c.system} : ${c.code}`).join(' | ') :
+    codeObject.coding.filter((c) => c).map((c) => `${c.system} : ${c.code}`).join(' | ') :
     '';
 };
 
@@ -63,7 +63,7 @@ const getDiseaseStatusResources = (bundle) => {
       'Observation',
       {},
       false,
-  ).filter((r) => r.code && r.code.coding.some((c) => c.system === 'http://loinc.org' && c.code === '88040-1'));
+  ).filter((r) => r.code && r.code.coding.filter((c) => c).some((c) => c.system === 'http://loinc.org' && c.code === '88040-1'));
 };
 
 // Retrieves condition resource by looking at ids and identifiers on focus reference
