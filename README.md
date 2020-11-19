@@ -3,27 +3,10 @@
 The `icaredata-platform` repository contains the code for the AWS Lambda functions for the ICAREdata infrastructure.
 ## Install Dependencies  
 
-The following instructions assume a MacOS development setup.
-
-Install the [Homebrew](https://brew.sh/) package manager.
-
-Use Homebrew in the command line to install `node` and `yarn`.
+Use `npm` to install dependencies.
 
 ```bash
-brew install node
-brew install yarn
-```
-
-After installing these, `yarn` can be used to install all required dependencies for the code in this repository.
-
-```bash
-yarn install
-```
-
-Finally, install Terraform, an automated build and deployment tool for AWS resources.
-
-```bash
-brew install terraform
+npm install
 ```
 
 ## Run the Test Suite
@@ -33,7 +16,7 @@ brew install terraform
 To run the test suite for this repository, run the following command.
 
 ```bash
-yarn test
+npm test
 ```
 
 ## Deploying to AWS
