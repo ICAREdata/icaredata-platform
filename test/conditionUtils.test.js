@@ -1,12 +1,12 @@
 const rewire = require('rewire');
-const {expect} = require('chai');
+const { expect } = require('chai');
 const conditionUtils = rewire('../utils/conditionUtils');
 const exampleSecondaryCondition = require('./fixtures/conditionUtils/exampleSecondaryCondition.json');
-const secondaryCancerConditionVS = require('../utils/valueSets/ValueSet-onco-core-SecondaryCancerDisorderVS.json');
+const secondaryCancerConditionVS = require('../utils/valueSets/ValueSet-mcode-secondary-cancer-disorder-vs.json');
 
 describe('Condition Utility', () => {
   describe('getCancerType', () => {
-    const {getCancerType} = conditionUtils;
+    const { getCancerType } = conditionUtils;
     it('Should return secondary', () => {
       const cancerType = getCancerType(exampleSecondaryCondition);
       expect(cancerType).to.equal('secondary');
@@ -22,23 +22,12 @@ describe('Condition Utility', () => {
 
   const checkCodeInVS = conditionUtils.__get__('checkCodeInVS');
   describe('checkCodeInVS', () => {
-    const exampleSnomedCondition = {
-      code: {
-        coding: [
-          {
-            system: 'http://snomed.info/sct',
-            code: '94225005',
-          },
-        ],
-      },
-    };
-
     const exampleIcdCondition = {
       code: {
         coding: [
           {
             system: 'http://hl7.org/fhir/sid/icd-10-cm',
-            code: 'C7981',
+            code: 'C79.81',
           },
         ],
       },
@@ -60,16 +49,11 @@ describe('Condition Utility', () => {
         coding: [
           {
             system: 'wrong-system',
-            code: 'C7981',
+            code: 'C79.81',
           },
         ],
       },
     };
-
-    it('should return true with snomed code in value set', () => {
-      const response = checkCodeInVS(exampleSnomedCondition, secondaryCancerConditionVS);
-      expect(response).to.be.true;
-    });
 
     it('should return true with icd-10 code in value set', () => {
       const response = checkCodeInVS(exampleIcdCondition, secondaryCancerConditionVS);
@@ -87,11 +71,10 @@ describe('Condition Utility', () => {
     });
 
     it('should check valueSet.compose if expansion not in valueSet', () => {
-      const valueSetWithoutExpansion = {...secondaryCancerConditionVS};
+      const valueSetWithoutExpansion = { ...secondaryCancerConditionVS };
       delete valueSetWithoutExpansion.expansion;
 
       // Snomed codes are only included in value set with expansion
-      expect(checkCodeInVS(exampleSnomedCondition, valueSetWithoutExpansion)).to.be.false;
       expect(checkCodeInVS(exampleIcdCondition, valueSetWithoutExpansion)).to.be.true;
       expect(checkCodeInVS(exampleConditionWithBadCode, valueSetWithoutExpansion)).to.be.false;
       expect(checkCodeInVS(exampleConditionWithBadSystem, valueSetWithoutExpansion)).to.be.false;

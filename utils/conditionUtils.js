@@ -1,4 +1,4 @@
-const secondaryCancerConditionVS = require('./valueSets/ValueSet-onco-core-SecondaryCancerDisorderVS.json');
+const secondaryCancerConditionVS = require('./valueSets/ValueSet-mcode-secondary-cancer-disorder-vs.json');
 
 /**
  * Check if condition is in value set

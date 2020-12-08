@@ -1,4 +1,4 @@
-const {expect} = require('chai');
+const { expect } = require('chai');
 const rewire = require('rewire');
 const extraction = rewire('../extraction');
 const data = require('./fixtures/extraction/data.json');
@@ -11,8 +11,8 @@ const processData = extraction.__get__('processData');
 
 describe('Extraction', () => {
   describe('translateCode', () => {
-    const codingObject1 = {system: 'system1', code: 'code1'};
-    const codingObject2 = {system: 'system2', code: 'code2'};
+    const codingObject1 = { system: 'system1', code: 'code1' };
+    const codingObject2 = { system: 'system2', code: 'code2' };
     const exampleCodeObject = {
       coding: [codingObject1],
     };
@@ -22,21 +22,21 @@ describe('Extraction', () => {
     });
 
     it('returns string in correct format', () => {
-      const {system, code} = codingObject1;
+      const { system, code } = codingObject1;
       expect(translateCode(exampleCodeObject)).to.equal(`${system} : ${code}`);
     });
 
     it('returns delimited string in correct format when multiple codings', () => {
-      const {system: system1, code: code1} = codingObject1;
-      const {system: system2, code: code2} = codingObject2;
-      const modifiedCodeObject = {...exampleCodeObject};
+      const { system: system1, code: code1 } = codingObject1;
+      const { system: system2, code: code2 } = codingObject2;
+      const modifiedCodeObject = { ...exampleCodeObject };
       modifiedCodeObject.coding.push(codingObject2);
       expect(translateCode(modifiedCodeObject)).to.equal(`${system1} : ${code1} | ${system2} : ${code2}`);
     });
   });
 
   describe('getDiseaseStatusResources', () => {
-    const observationWithoutCode = {resourceType: 'Observation'};
+    const observationWithoutCode = { resourceType: 'Observation' };
     const observationWithCode = {
       resourceType: 'Observation',
       code: {
@@ -48,18 +48,18 @@ describe('Extraction', () => {
         ],
       },
     };
-    const bundle = {resourceType: 'Bundle'};
+    const bundle = { resourceType: 'Bundle' };
 
     it('returns an empty array', () => {
-      bundle.entry = [{resource: observationWithoutCode}];
+      bundle.entry = [{ resource: observationWithoutCode }];
       expect(getDiseaseStatusResources(bundle)).to.be.empty;
     });
 
     it('returns array with disease status', () => {
-      bundle.entry = [{resource: observationWithCode}];
+      bundle.entry = [{ resource: observationWithCode }];
       expect(getDiseaseStatusResources(bundle)).to.have.length(1);
 
-      bundle.entry.push({resource: observationWithoutCode});
+      bundle.entry.push({ resource: observationWithoutCode });
       expect(bundle.entry).to.have.length(2);
       // Should filter out observation without loinc code
       expect(getDiseaseStatusResources(bundle)).to.have.length(1);
@@ -86,7 +86,7 @@ describe('Extraction', () => {
       effectiveDate: '2019-04-01',
       codeValue: 'http://snomed.info/sct : 268910001',
       cancerType: 'primary',
-      cancerCodeValue: 'http://snomed.info/sct : 254637007 | http://hl7.org/fhir/sid/icd-10-cm : C50211',
+      cancerCodeValue: 'http://snomed.info/sct : 254637007 | http://hl7.org/fhir/sid/icd-10-cm : C50.211',
       evidence: 'http://snomed.info/sct : 252416005',
       subjectId: 'subjectId1',
       trialId: 'trialId1',
