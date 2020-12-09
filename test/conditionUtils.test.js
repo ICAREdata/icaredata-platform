@@ -1,12 +1,12 @@
 const rewire = require('rewire');
-const { expect } = require('chai');
+const {expect} = require('chai');
 const conditionUtils = rewire('../utils/conditionUtils');
 const exampleSecondaryCondition = require('./fixtures/conditionUtils/exampleSecondaryCondition.json');
 const secondaryCancerConditionVS = require('../utils/valueSets/ValueSet-mcode-secondary-cancer-disorder-vs.json');
 
 describe('Condition Utility', () => {
   describe('getCancerType', () => {
-    const { getCancerType } = conditionUtils;
+    const {getCancerType} = conditionUtils;
     it('Should return secondary', () => {
       const cancerType = getCancerType(exampleSecondaryCondition);
       expect(cancerType).to.equal('secondary');
@@ -71,7 +71,7 @@ describe('Condition Utility', () => {
     });
 
     it('should check valueSet.compose if expansion not in valueSet', () => {
-      const valueSetWithoutExpansion = { ...secondaryCancerConditionVS };
+      const valueSetWithoutExpansion = {...secondaryCancerConditionVS};
       delete valueSetWithoutExpansion.expansion;
 
       // Snomed codes are only included in value set with expansion
