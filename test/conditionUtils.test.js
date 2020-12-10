@@ -22,6 +22,17 @@ describe('Condition Utility', () => {
 
   const checkCodeInVS = conditionUtils.__get__('checkCodeInVS');
   describe('checkCodeInVS', () => {
+    const exampleSnomedCondition = {
+      code: {
+        coding: [
+          {
+            system: 'http://snomed.info/sct',
+            code: '94225005',
+          },
+        ],
+      },
+    };
+
     const exampleIcdCondition = {
       code: {
         coding: [
@@ -55,6 +66,11 @@ describe('Condition Utility', () => {
       },
     };
 
+    it('should return true with snomed code in value set', () => {
+      const response = checkCodeInVS(exampleSnomedCondition, secondaryCancerConditionVS);
+      expect(response).to.be.true;
+    });
+
     it('should return true with icd-10 code in value set', () => {
       const response = checkCodeInVS(exampleIcdCondition, secondaryCancerConditionVS);
       expect(response).to.be.true;
@@ -75,6 +91,7 @@ describe('Condition Utility', () => {
       delete valueSetWithoutExpansion.expansion;
 
       // Snomed codes are only included in value set with expansion
+      expect(checkCodeInVS(exampleSnomedCondition, valueSetWithoutExpansion)).to.be.false;
       expect(checkCodeInVS(exampleIcdCondition, valueSetWithoutExpansion)).to.be.true;
       expect(checkCodeInVS(exampleConditionWithBadCode, valueSetWithoutExpansion)).to.be.false;
       expect(checkCodeInVS(exampleConditionWithBadSystem, valueSetWithoutExpansion)).to.be.false;
