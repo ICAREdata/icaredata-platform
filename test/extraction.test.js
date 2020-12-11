@@ -86,7 +86,7 @@ describe('Extraction', () => {
       effectiveDate: '2019-04-01',
       codeValue: 'http://snomed.info/sct : 268910001',
       cancerType: 'primary',
-      cancerCodeValue: 'http://snomed.info/sct : 254637007 | http://hl7.org/fhir/sid/icd-10-cm : C50211',
+      cancerCodeValue: 'http://snomed.info/sct : 254637007 | http://hl7.org/fhir/sid/icd-10-cm : C50.211',
       evidence: 'http://snomed.info/sct : 252416005',
       subjectId: 'subjectId1',
       trialId: 'trialId1',

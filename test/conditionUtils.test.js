@@ -2,7 +2,7 @@ const rewire = require('rewire');
 const {expect} = require('chai');
 const conditionUtils = rewire('../utils/conditionUtils');
 const exampleSecondaryCondition = require('./fixtures/conditionUtils/exampleSecondaryCondition.json');
-const secondaryCancerConditionVS = require('../utils/valueSets/ValueSet-onco-core-SecondaryCancerDisorderVS.json');
+const secondaryCancerConditionVS = require('../utils/valueSets/ValueSet-mcode-secondary-cancer-disorder-vs.json');
 
 describe('Condition Utility', () => {
   describe('getCancerType', () => {
@@ -38,7 +38,7 @@ describe('Condition Utility', () => {
         coding: [
           {
             system: 'http://hl7.org/fhir/sid/icd-10-cm',
-            code: 'C7981',
+            code: 'C79.81',
           },
         ],
       },
@@ -60,7 +60,7 @@ describe('Condition Utility', () => {
         coding: [
           {
             system: 'wrong-system',
-            code: 'C7981',
+            code: 'C79.81',
           },
         ],
       },
