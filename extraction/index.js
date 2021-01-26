@@ -118,24 +118,16 @@ const addDiseaseStatusDataToWorksheet = (bundle, worksheet, trialData) => {
   });
 };
 
-// Add Careplan resources to worksheet
-const addCarePlanDataToWorksheet = (bundle, worksheet, trialData) => {
-  const bundleId = fhirpath.evaluate(bundle, 'Bundle.id')[0];
-
-  // Get CarePlan Resources and add data to worksheet
-  const carePlanResources = getBundleResourcesByType(
-      bundle,
-      'CarePlan',
-      {},
-      false,
+// Get list of data objects for each extension on CarePlan
+const getCarePlanDataFromExtensions = (carePlanResource, bundleId) => {
+  const reviewExtensionUrl = 'http://mcodeinitiative.org/codex/us/icare/StructureDefinition/icare-care-plan-review';
+  const reviewExtensions = fhirpath.evaluate(
+      carePlanResource,
+      `CarePlan.extension.where(url='${reviewExtensionUrl}')`,
   );
-  carePlanResources.forEach((resource) => {
-    const reviewExtensionUrl = 'http://mcodeinitiative.org/codex/us/icare/StructureDefinition/icare-care-plan-review';
-    const reviewExtension = fhirpath.evaluate(
-        resource,
-        `CarePlan.extension.where(url='${reviewExtensionUrl}').extension`,
-    );
 
+  return reviewExtensions.map((e) => {
+    const reviewExtension = e.extension;
     const reviewDate = getExtensionsByUrl(reviewExtension, 'ReviewDate', true);
     const effectiveDate = reviewDate ? reviewDate.valueDate : '';
     const carePlanChangeReason = getExtensionsByUrl(reviewExtension, 'CarePlanChangeReason', true);
@@ -156,11 +148,33 @@ const addCarePlanDataToWorksheet = (bundle, worksheet, trialData) => {
       console.log(`No CarePlanChangeReason was found on Bundle ${bundleId}.`);
     }
 
-    worksheet.addRow({
-      ...trialData,
+    return {
       effectiveDate,
       changedFlag: (changedFlag.valueBoolean != null) ? `${changedFlag.valueBoolean}` : '',
       codeValue,
+    };
+  });
+};
+
+// Add Careplan resources to worksheet
+const addCarePlanDataToWorksheet = (bundle, worksheet, trialData) => {
+  const bundleId = fhirpath.evaluate(bundle, 'Bundle.id')[0];
+
+  // Get CarePlan Resources and add data to worksheet
+  const carePlanResources = getBundleResourcesByType(
+      bundle,
+      'CarePlan',
+      {},
+      false,
+  );
+  carePlanResources.forEach((resource) => {
+    const extensionData = getCarePlanDataFromExtensions(resource, bundleId);
+
+    extensionData.forEach((d) => {
+      worksheet.addRow({
+        ...trialData,
+        ...d,
+      });
     });
   });
 };

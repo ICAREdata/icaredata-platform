@@ -2,12 +2,14 @@ const {expect} = require('chai');
 const rewire = require('rewire');
 const extraction = rewire('../extraction');
 const data = require('./fixtures/extraction/data.json');
+const treatmentPlanChangeData = require('./fixtures/extraction/carePlanResources.json');
 
 // helpers from extraction/index.js
 const createIcareWorkbook = extraction.__get__('createIcareWorkbook');
 const translateCode = extraction.__get__('translateCode');
 const getDiseaseStatusResources = extraction.__get__('getDiseaseStatusResources');
 const processData = extraction.__get__('processData');
+const getCarePlanDataFromExtensions = extraction.__get__('getCarePlanDataFromExtensions');
 
 describe('Extraction', () => {
   describe('translateCode', () => {
@@ -117,15 +119,36 @@ describe('Extraction', () => {
       expect(dsRow.getCell('trialId').text).to.equal(expectedDsRow.trialId);
       expect(dsRow.getCell('siteId').text).to.equal(expectedDsRow.siteId);
 
-      // Header + 1 careplan from each bundle
-      expect(treatmentPlanChangeWorksheet.rowCount).to.equal(3);
-      const tpRow = treatmentPlanChangeWorksheet.getRow(3);
+      // Header + 1 careplan extension from each bundle
+      expect(treatmentPlanChangeWorksheet.rowCount).to.equal(4);
+      const tpRow = treatmentPlanChangeWorksheet.getRow(4);
       expect(tpRow.getCell('effectiveDate').text).to.equal(expectedTpRow.effectiveDate);
       expect(tpRow.getCell('changedFlag').text).to.equal(expectedTpRow.changedFlag);
       expect(tpRow.getCell('codeValue').text).to.equal(expectedTpRow.codeValue);
       expect(tpRow.getCell('subjectId').text).to.equal(expectedTpRow.subjectId);
       expect(tpRow.getCell('trialId').text).to.equal(expectedTpRow.trialId);
       expect(tpRow.getCell('siteId').text).to.equal(expectedTpRow.siteId);
+    });
+  });
+
+  describe('getCarePlanDataFromExtensions', () => {
+    it('gets proper list of extension entries', () => {
+      const expectedReturn = [
+        {
+          effectiveDate: '2020-03-23',
+          changedFlag: 'true',
+          codeValue: 'http://snomed.info/sct : 281647001',
+        },
+        {
+          effectiveDate: '2020-02-23',
+          changedFlag: 'false',
+          codeValue: '',
+        },
+      ];
+
+      const extensionData = getCarePlanDataFromExtensions(treatmentPlanChangeData, '');
+
+      expect(extensionData).to.deep.equal(expectedReturn);
     });
   });
 });
