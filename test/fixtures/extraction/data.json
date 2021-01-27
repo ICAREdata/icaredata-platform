@@ -154,6 +154,19 @@
                                                     }
                                                 }
                                             ]
+                                        },
+                                        {
+                                            "url": "http://mcodeinitiative.org/codex/us/icare/StructureDefinition/icare-care-plan-review",
+                                            "extension": [
+                                                {
+                                                    "url": "ChangedFlag",
+                                                    "valueBoolean": false
+                                                },
+                                                {
+                                                    "url": "ReviewDate",
+                                                    "valueDate": "2020-02-23"
+                                                }
+                                            ]
                                         }
                                     ]
                                 }
