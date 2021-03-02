@@ -113,7 +113,9 @@ const addDiseaseStatusDataToWorksheet = (bundle, worksheet, trialData) => {
       effectiveDate: resource.effectiveDateTime,
       cancerType: condition ? getCancerType(condition) : '',
       cancerCodeValue: condition ? translateCode(condition.code) : '',
-      codeValue: translateCode(resource.valueCodeableConcept),
+      codeValue: resource.valueCodeableConcept.extension && resource.valueCodeableConcept.extension.some((e) => e.valueCode === 'not-asked') ?
+        'not-asked' :
+        translateCode(resource.valueCodeableConcept),
     });
   });
 };
