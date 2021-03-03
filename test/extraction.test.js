@@ -119,6 +119,10 @@ describe('Extraction', () => {
       expect(dsRow.getCell('trialId').text).to.equal(expectedDsRow.trialId);
       expect(dsRow.getCell('siteId').text).to.equal(expectedDsRow.siteId);
 
+      // A disease status bundle with a dataAbsentReason extension should have 'not-asked' in it's codeValue field
+      const dsNotAskedRow = diseaseStatusWorksheet.getRow(4);
+      expect(dsNotAskedRow.getCell('codeValue').text).to.equal('not-asked');
+
       // Header + 1 careplan extension from each bundle
       expect(treatmentPlanChangeWorksheet.rowCount).to.equal(4);
       const tpRow = treatmentPlanChangeWorksheet.getRow(4);
