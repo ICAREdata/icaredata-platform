@@ -27,7 +27,7 @@
     "fhirpath": "^0.17.4",
     "fs": "0.0.1-security",
     "knex": "^0.19.5",
-    "lodash": "^4.17.19",
+    "lodash": "^4.17.21",
     "node-forge": "^0.10.0",
     "node-jose": "^2.0.0",
     "pg": "^7.18.1",
