@@ -8,7 +8,8 @@ resource "aws_api_gateway_method" "process_message" {
   rest_api_id   = aws_api_gateway_rest_api.gateway.id
   resource_id   = aws_api_gateway_resource.process_message.id
   http_method   = "POST"
-  authorization = "NONE"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.authorizer.id
 }
 
 resource "aws_lambda_function" "process_message" {
@@ -17,6 +18,13 @@ resource "aws_lambda_function" "process_message" {
   handler       = "process-message/index.handler"
   runtime       = "nodejs10.x"
   role          = aws_iam_role.lambda_exec.arn
+
+  environment {
+    variables = {
+      "foo" = "bar"
+    }
+  }
+
 }
 
 resource "aws_api_gateway_integration" "process_message" {
