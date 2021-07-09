@@ -27,6 +27,13 @@ resource "aws_lambda_function" "proxy" {
   handler       = "proxy/index.handler"
   runtime       = "nodejs10.x"
   role          = aws_iam_role.lambda_exec.arn
+
+  environment {
+    variables = {
+      "foo" = "bar"
+    }
+  }
+
 }
 
 resource "aws_api_gateway_integration" "proxy" {

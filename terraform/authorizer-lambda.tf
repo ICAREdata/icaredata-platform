@@ -1,3 +1,7 @@
+resource "aws_secretsmanager_secret" "authorizer_secret" {
+  name = "Keycloak-Authorizer"
+}
+
 resource "aws_api_gateway_authorizer" "authorizer" {
   name                   = "authorizer"
   rest_api_id            = aws_api_gateway_rest_api.gateway.id
@@ -14,6 +18,11 @@ resource "aws_lambda_function" "authorizer" {
   handler       = "authorizer/index.handler"
   runtime       = "nodejs10.x"
   role          = aws_iam_role.lambda_exec.arn
+  environment {
+    variables = {
+      "foo" = "bar"
+    }
+  }
 }
 
 
