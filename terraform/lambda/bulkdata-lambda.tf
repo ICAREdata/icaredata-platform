@@ -26,7 +26,7 @@ resource "aws_lambda_function" "bulkdata" {
   
   environment {
     variables = {
-      "foo" = "bar"
+      "TOKEN_ENDPOINT" = "${var.bulk_data_token_endpoint}"
     }
   }
 

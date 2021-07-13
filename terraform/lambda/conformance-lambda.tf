@@ -20,7 +20,7 @@ resource "aws_lambda_function" "conformance" {
 
   environment {
     variables = {
-      "foo" = "bar"
+      "METADATA_URL" = "${var.metadata_url"
     }
   }
 
