@@ -24,7 +24,7 @@
     "aws-sdk": "^2.594.0",
     "dotenv": "^8.2.0",
     "exceljs": "^3.8.1",
-    "fhirpath": "^0.17.4",
+    "fhirpath": "^2.1.5",
     "fs": "0.0.1-security",
     "knex": "^0.19.5",
     "lodash": "^4.17.21",

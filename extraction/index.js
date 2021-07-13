@@ -7,6 +7,7 @@ const {
   doResourceAndReferenceIdsMatch,
 } = require('../utils/fhirUtils');
 const {getCancerType} = require('../utils/conditionUtils');
+const _ = require('lodash');
 const exceljs = require('exceljs');
 const Stream = require('stream');
 const archiver = require('archiver');
@@ -117,6 +118,13 @@ const addDiseaseStatusDataToWorksheet = (bundle, worksheet, trialData) => {
         'not-asked' :
         translateCode(resource.valueCodeableConcept),
     });
+    const newRow = worksheet.getRow(worksheet.rowCount).values;
+    for (let i = 1; i < worksheet.rowCount; i++) {
+      if (_.isEqual(newRow, worksheet.getRow(i).values)) {
+        worksheet.spliceRows(worksheet.rowCount, 1, []);
+        break;
+      }
+    }
   });
 };
 
@@ -177,6 +185,13 @@ const addCarePlanDataToWorksheet = (bundle, worksheet, trialData) => {
         ...trialData,
         ...d,
       });
+      const newRow = worksheet.getRow(worksheet.rowCount).values;
+      for (let i = 1; i < worksheet.rowCount; i++) {
+        if (_.isEqual(newRow, worksheet.getRow(i).values)) {
+          worksheet.spliceRows(worksheet.rowCount, 1, []);
+          break;
+        }
+      }
     });
   });
 };
