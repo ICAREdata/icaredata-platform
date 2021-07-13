@@ -48,17 +48,14 @@
     lodash.isundefined "^3.0.1"
     lodash.uniq "^4.5.0"
 
-"@lhncbc/ucum-lhc@^3.0.0":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@lhncbc/ucum-lhc/-/ucum-lhc-3.0.1.tgz#57044ac13db3dafb58d20e207dd6c17c2a930924"
-  integrity sha512-4vDc/bFU6ASLjCvx36PFnTAN49I7JrAlYdGCXB1h36awQVx2DM8VHr/BO0GjlRMOv9gHf7EMbCVk9HfULUULWw==
+"@lhncbc/ucum-lhc@^4.1.3":
+  version "4.1.4"
+  resolved "https://registry.yarnpkg.com/@lhncbc/ucum-lhc/-/ucum-lhc-4.1.4.tgz#763d26a1e2d58b204fc645ae5128262c8cdc56bc"
+  integrity sha512-ErlXJv6lrerZbthxc33SWTKrZv4KjMIaCN2lNxsNrGZW4PqyVFEKDie6lok//SvC6QeEoAC1mWN8xD87r72qPQ==
   dependencies:
-    braces "^2.3.1"
     csv-parse "^4.4.6"
     csv-stringify "^1.0.4"
     escape-html "^1.0.3"
-    fs "0.0.1-security"
-    grunt-extract-sourcemap "^0.1.19"
     is-integer "^1.0.6"
     jsonfile "^2.2.3"
     stream "0.0.2"
@@ -142,10 +139,10 @@ ansi-styles@^4.1.0:
   dependencies:
     color-convert "^2.0.1"
 
-antlr4@^4.7.1:
-  version "4.9.2"
-  resolved "https://registry.yarnpkg.com/antlr4/-/antlr4-4.9.2.tgz#abbc53d275954b1b6f4d8b3468b4a2cb258121fc"
-  integrity sha512-UjMSlenUORL+a+6g4RNZxRh5LcFWybRi2g0ASDBpgXBY6nlavg0BRVAVEQF0dz8jH6SyX3lV7uP5y/krJzc+Hw==
+antlr4@~4.8.0:
+  version "4.8.0"
+  resolved "https://registry.yarnpkg.com/antlr4/-/antlr4-4.8.0.tgz#f938ec171be7fc2855cd3a533e87647185b32b6a"
+  integrity sha512-en/MxQ4OkPgGJQ3wD/muzj1uDnFSzdFIhc2+c6bHZokWkuBb6RRvFjpWhPxWLbgQvaEzldJZ0GSQpfSAaE3hqg==
 
 archiver-utils@^2.1.0:
   version "2.1.0"
@@ -526,11 +523,6 @@ cliui@^5.0.0:
     string-width "^3.1.0"
     strip-ansi "^5.2.0"
     wrap-ansi "^5.1.0"
-
-coffee-script@~1.10.0:
-  version "1.10.0"
-  resolved "https://registry.yarnpkg.com/coffee-script/-/coffee-script-1.10.0.tgz#12938bcf9be1948fa006f92e0c4c9e81705108c0"
-  integrity sha1-EpOLz5vhlI+gBvkuDEyegXBRCMA=
 
 collection-visit@^1.0.0:
   version "1.0.0"
@@ -1099,13 +1091,13 @@ fast-levenshtein@~2.0.6:
   resolved "https://registry.yarnpkg.com/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
   integrity sha1-PYpcZog6FqMMqGQ+hR8Zuqd5eRc=
 
-fhirpath@^0.17.4:
-  version "0.17.5"
-  resolved "https://registry.yarnpkg.com/fhirpath/-/fhirpath-0.17.5.tgz#9d9f63a7a2d52f1c154793b6ded05d40acb8c8a0"
-  integrity sha512-/8iN0YTWxmu+iSO2r1mZ4ITWZYXiEh1/eyfrHP7+8ILZ071S2rN9njIjccP3OXT6leW+9dHt1xTIY199x3XeVw==
+fhirpath@^2.1.5:
+  version "2.9.1"
+  resolved "https://registry.yarnpkg.com/fhirpath/-/fhirpath-2.9.1.tgz#2b38a528a4905c787334bb770141f9b9665d3a74"
+  integrity sha512-bgynbYqbn8cwNT/IgEpeqHTICmwB+zWNsEgcUEnsvZaYm5xob7HvlnaoAMSHPKJ0eh/aOBq7Bsv0bMbaHEGymQ==
   dependencies:
-    "@lhncbc/ucum-lhc" "^3.0.0"
-    antlr4 "^4.7.1"
+    "@lhncbc/ucum-lhc" "^4.1.3"
+    antlr4 "~4.8.0"
     commander "^2.18.0"
     date-fns "^1.30.1"
     js-yaml "^3.13.1"
@@ -1395,14 +1387,6 @@ grunt-cli@~1.3.2:
     liftoff "~2.5.0"
     nopt "~4.0.1"
     v8flags "~3.1.1"
-
-grunt-extract-sourcemap@^0.1.19:
-  version "0.1.19"
-  resolved "https://registry.yarnpkg.com/grunt-extract-sourcemap/-/grunt-extract-sourcemap-0.1.19.tgz#bd4630125d56875c7cb3b70003ca30137245a692"
-  integrity sha1-vUYwEl1Wh1x8s7cAA8owE3JFppI=
-  dependencies:
-    coffee-script "~1.10.0"
-    lazy.js "~0.4.2"
 
 grunt-known-options@~1.1.0:
   version "1.1.1"
@@ -1954,11 +1938,6 @@ knex@^0.19.5:
     tildify "2.0.0"
     uuid "^3.3.3"
     v8flags "^3.1.3"
-
-lazy.js@~0.4.2:
-  version "0.4.3"
-  resolved "https://registry.yarnpkg.com/lazy.js/-/lazy.js-0.4.3.tgz#87f67a07ad36555121e4fff1520df31be66786d8"
-  integrity sha1-h/Z6B602VVEh5P/xUg3zG+Znhtg=
 
 lazystream@^1.0.0:
   version "1.0.0"
