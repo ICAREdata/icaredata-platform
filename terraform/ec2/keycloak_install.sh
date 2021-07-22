@@ -20,8 +20,17 @@ wget https://jdbc.postgresql.org/download/postgresql-42.2.23.jar
 tar -xzf $KEYCLOAK_ARCHIVE_NAME
 ln -s /opt/keycloak/$KEYCLOAK_FILENAME /opt/keycloak/current
 
+cp /tmp/standalone.xml /opt/keycloak/current/standalone/configuration/standalone.xml
+
+read -r -e  "Database URL: " db_host
+read -r -e -s -p  "Keycloak Password: " kc_pass
+
+
+sed -i 's/database_host/$db_host/' /opt/keycloak/current/standalone/configuration/standalone.xml
+sed -i 's/database_password/$kc_pass/' /opt/keycloak/current/standalone/configuration/standalone.xml
 
 cd /opt/keycloak/current/modules
+
 mkdir -p org/postgresql/main
 cp /opt/keycloak/postgresql-42.2.23.jar org/postgresql/main/postgresql-42.2.23.jar
 

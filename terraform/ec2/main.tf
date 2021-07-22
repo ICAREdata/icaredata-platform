@@ -79,7 +79,42 @@ resource "aws_instance" "keycloak" {
 #  instance = aws_instance.keycloak.id
 #}
 
+
+resource "null_resource" "provisioner" {
+  triggers = {
+    public_ip = aws_instance.keycloak.public_ip
+  }
+
+  connection {
+    type  = "ssh"
+    host  = aws_instance.keycloak.public_ip
+    user  = "ec2-user"
+    private_key = "${file("./${var.generated_key_name}.pem")}"
+    port  = 22
+    agent = true
+  }
+
+  provisioner "file" {
+    source      = "standalone.xml"
+    destination = "/tmp/standalone.xml"
+  }
+
+  provisioner "file" {
+    source      = "keycloak_install.sh"
+    destination = "/tmp/keycloak_install.sh"
+  }
+
+  provisioner "file" {
+    source      = "db_setup.sh"
+    destination = "/tmp/db_setup.sh"
+  }
+    provisioner "file" {
+    source      = "../rds/schema.sql"
+    destination = "/tmp/schema.sql"
+  }
+}
+
 output "instance_ip_addr" {
   value = aws_instance.keycloak.public_ip
 }
-}
+
