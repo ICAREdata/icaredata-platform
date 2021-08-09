@@ -33,7 +33,7 @@ resource "aws_api_gateway_integration" "process_message" {
   http_method = aws_api_gateway_method.process_message.http_method
 
   integration_http_method = "POST"
-  type                    = "AWS_PROXY"
+  type                    = "AWS"
   uri                     = aws_lambda_function.process_message.invoke_arn
 }
 

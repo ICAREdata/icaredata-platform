@@ -31,7 +31,7 @@ variable "forwarded_host" {
 }
 
 variable "bulk_data_token_endpoint" {
-description = "The endpoint that clients can use to request a token.  This will be "
+  description = "The endpoint that clients can use to request a token.  This will be "
 }
 
 variable "s3_bucket" {
@@ -40,4 +40,8 @@ variable "s3_bucket" {
 
 variable "extraction_password" {
   description = "The password that the encrypted zip file will use for extracts stored in S3"
+}
+
+variable "metadata_url" {
+  description = "The endpoint at which the FHIR Conformance statement is provided"
 }

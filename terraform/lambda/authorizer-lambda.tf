@@ -3,11 +3,11 @@ resource "aws_secretsmanager_secret" "authorizer_secret" {
 }
 
 resource "aws_api_gateway_authorizer" "authorizer" {
-  name                   = "authorizer"
-  rest_api_id            = aws_api_gateway_rest_api.gateway.id
-  authorizer_uri         = aws_lambda_function.authorizer.invoke_arn
-  identity_source        = "method.request.header.Authorization"
-  type                   = "REQUEST"
+  name            = "authorizer"
+  rest_api_id     = aws_api_gateway_rest_api.gateway.id
+  authorizer_uri  = aws_lambda_function.authorizer.invoke_arn
+  identity_source = "method.request.header.Authorization"
+  type            = "REQUEST"
 }
 
 
@@ -23,7 +23,7 @@ resource "aws_lambda_function" "authorizer" {
       "OAUTH_SERVER_HOST" = "${var.oauth_server_host}"
       "OAUTH_SERVER_PORT" = "${var.oauth_server_port}"
       "OAUTH_SERVER_PATH" = "${var.oauth_server_path}"
-      "FORWARDED_HOST" = "${var.forwarded_host}"
+      "FORWARDED_HOST"    = "${var.forwarded_host}"
     }
   }
 }

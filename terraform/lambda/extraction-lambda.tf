@@ -5,7 +5,7 @@ resource "aws_secretsmanager_secret" "extraction_zip" {
 
 resource "aws_secretsmanager_secret_version" "extraction_zip_value" {
   secret_id     = aws_secretsmanager_secret.extraction_zip.id
-  secret_string = "${var.extraction_password}"
+  secret_string = var.extraction_password
 }
 
 

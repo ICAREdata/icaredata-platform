@@ -23,7 +23,7 @@ resource "aws_lambda_function" "bulkdata" {
   handler       = "bulkdata/index.handler"
   runtime       = "nodejs10.x"
   role          = aws_iam_role.lambda_exec.arn
-  
+
   environment {
     variables = {
       "TOKEN_ENDPOINT" = "${var.bulk_data_token_endpoint}"
@@ -56,7 +56,7 @@ resource "aws_api_gateway_integration_response" "bulk_data_response" {
   resource_id = aws_api_gateway_resource.bulkdata.id
   http_method = aws_api_gateway_method.bulkdata.http_method
   status_code = aws_api_gateway_method_response.bulk_data_response_200.status_code
-
+  depends_on  = [aws_api_gateway_integration.bulkdata]
 }
 
 

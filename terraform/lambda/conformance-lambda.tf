@@ -20,7 +20,7 @@ resource "aws_lambda_function" "conformance" {
 
   environment {
     variables = {
-      "METADATA_URL" = "${var.metadata_url"
+      "METADATA_URL" = "${var.metadata_url}"
     }
   }
 
@@ -50,7 +50,7 @@ resource "aws_api_gateway_integration_response" "conformance_integration_respons
   resource_id = aws_api_gateway_resource.conformance.id
   http_method = aws_api_gateway_method.conformance.http_method
   status_code = aws_api_gateway_method_response.conformance_response_200.status_code
-
+  depends_on = [aws_api_gateway_integration.conformance]
 }
 
 

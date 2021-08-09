@@ -33,7 +33,7 @@ resource "aws_lambda_function" "proxy" {
       "OAUTH_SERVER_HOST" = "${var.oauth_server_host}"
       "OAUTH_SERVER_PORT" = "${var.oauth_server_port}"
       "OAUTH_SERVER_PATH" = "${var.oauth_server_path}"
-      "FORWARDED_HOST" = "${var.forwarded_host}"
+      "FORWARDED_HOST"    = "${var.forwarded_host}"
     }
   }
 
