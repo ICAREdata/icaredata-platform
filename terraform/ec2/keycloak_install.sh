@@ -22,7 +22,7 @@ ln -s /opt/keycloak/$KEYCLOAK_FILENAME /opt/keycloak/current
 
 cp /tmp/standalone.xml /opt/keycloak/current/standalone/configuration/standalone.xml
 
-read -r -e  "Database URL: " db_host
+read -r -e -p  "Database URL: " db_host
 read -r -e -s -p  "Keycloak Password: " kc_pass
 
 
@@ -78,7 +78,7 @@ WantedBy=multi-user.target
 ' > /etc/systemd/system/keycloak.service
 
 systemctl daemon-reload
-service rsyslog restart
-systemctl start keycloak.services
+systemctl enable keycloak
+systemctl start keycloak
 
 

@@ -16,7 +16,7 @@ resource "aws_lambda_function" "authorizer" {
   filename      = "build/authorizer.zip"
   function_name = "AuthProxy"
   handler       = "authorizer/index.handler"
-  runtime       = "nodejs10.x"
+  runtime       = "nodejs12.x"
   role          = aws_iam_role.lambda_exec.arn
   environment {
     variables = {

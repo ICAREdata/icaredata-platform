@@ -16,12 +16,13 @@ resource "aws_lambda_function" "process_message" {
   filename      = "build/process-message.zip"
   function_name = "ProcessMessage"
   handler       = "process-message/index.handler"
-  runtime       = "nodejs10.x"
+  runtime       = "nodejs12.x"
   role          = aws_iam_role.lambda_exec.arn
 
   environment {
     variables = {
-      "foo" = "bar"
+      "DATABASE_HOST" = "${var.database_host}",
+      "DATABASE_PORT" = "5432"
     }
   }
 

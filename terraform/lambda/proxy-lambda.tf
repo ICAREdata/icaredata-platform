@@ -17,7 +17,7 @@ resource "aws_api_gateway_resource" "proxy" {
 resource "aws_api_gateway_method" "proxy" {
   rest_api_id   = aws_api_gateway_rest_api.gateway.id
   resource_id   = aws_api_gateway_resource.proxy.id
-  http_method   = "GET"
+  http_method   = "ANY"
   authorization = "NONE"
 }
 
@@ -25,7 +25,7 @@ resource "aws_lambda_function" "proxy" {
   filename      = "build/proxy.zip"
   function_name = "proxy"
   handler       = "proxy/index.handler"
-  runtime       = "nodejs10.x"
+  runtime       = "nodejs12.x"
   role          = aws_iam_role.lambda_exec.arn
 
   environment {
