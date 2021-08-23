@@ -26,8 +26,8 @@ read -r -e -p  "Database URL: " db_host
 read -r -e -s -p  "Keycloak Password: " kc_pass
 
 
-sed -i 's/database_host/$db_host/' /opt/keycloak/current/standalone/configuration/standalone.xml
-sed -i 's/database_password/$kc_pass/' /opt/keycloak/current/standalone/configuration/standalone.xml
+sed -i "s/database_host/${db_host}/" /opt/keycloak/current/standalone/configuration/standalone.xml
+sed -i "s/database_password/${kc_pass}/" /opt/keycloak/current/standalone/configuration/standalone.xml
 
 cd /opt/keycloak/current/modules
 

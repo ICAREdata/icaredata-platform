@@ -1,3 +1,8 @@
+locals {
+  extraction_secret = {
+    password = "${var.extraction_password}"
+  }
+}
 
 resource "aws_secretsmanager_secret" "extraction_zip" {
   name = "S3-Zip-Password"
@@ -5,7 +10,7 @@ resource "aws_secretsmanager_secret" "extraction_zip" {
 
 resource "aws_secretsmanager_secret_version" "extraction_zip_value" {
   secret_id     = aws_secretsmanager_secret.extraction_zip.id
-  secret_string = var.extraction_password
+  secret_string = "${jsonencode(local.extraction_secret)}"
 }
 
 

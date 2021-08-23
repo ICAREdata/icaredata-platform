@@ -22,7 +22,7 @@ resource "aws_lambda_function" "authorizer" {
     variables = {
       "OAUTH_SERVER_HOST" = "${var.oauth_server_host}"
       "OAUTH_SERVER_PORT" = "${var.oauth_server_port}"
-      "OAUTH_SERVER_PATH" = "${var.oauth_server_path}"
+      "OAUTH_SERVER_PATH" = "${var.oauth_server_path}/introspect"
       "FORWARDED_HOST"    = "${var.forwarded_host}"
     }
   }
