@@ -33,7 +33,7 @@ exports.handler = async (event) => {
       });
     });
     const post = querystring.stringify({
-      token: formatToken(event.authorizationToken),
+      token: formatToken(event.authorizationToken || event.headers.Authorization),
       token_type_hint: 'requesting_party_token',
     });
     req.write(post);
