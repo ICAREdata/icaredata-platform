@@ -7,6 +7,7 @@ const {
   doResourceAndReferenceIdsMatch,
 } = require('../utils/fhirUtils');
 const {getCancerType} = require('../utils/conditionUtils');
+const _ = require('lodash');
 const exceljs = require('exceljs');
 const Stream = require('stream');
 const archiver = require('archiver');
@@ -107,7 +108,7 @@ const addDiseaseStatusDataToWorksheet = (bundle, worksheet, trialData) => {
       console.log(`No Condition was found by reference on Bundle ${bundleId}.`);
     }
 
-    worksheet.addRow({
+    const newRow = {
       ...trialData,
       evidence,
       effectiveDate: resource.effectiveDateTime,
@@ -116,7 +117,16 @@ const addDiseaseStatusDataToWorksheet = (bundle, worksheet, trialData) => {
       codeValue: resource.valueCodeableConcept && resource.valueCodeableConcept.extension && resource.valueCodeableConcept.extension.some((e) => e.valueCode === 'not-asked') ?
         'not-asked' :
         translateCode(resource.valueCodeableConcept),
-    });
+    };
+    const newRowValues = worksheet.columns.map((col) => newRow[col.key]);
+    let duplicate = false;
+    for (let i = 1; i < worksheet.rowCount+1; i++) {
+      if (_.isEqual(newRowValues, worksheet.getRow(i).values.slice(1))) {
+        duplicate = true;
+        break;
+      }
+    }
+    if (!duplicate) worksheet.addRow(newRow);
   });
 };
 
@@ -173,10 +183,19 @@ const addCarePlanDataToWorksheet = (bundle, worksheet, trialData) => {
     const extensionData = getCarePlanDataFromExtensions(resource, bundleId);
 
     extensionData.forEach((d) => {
-      worksheet.addRow({
+      const newRow = {
         ...trialData,
         ...d,
-      });
+      };
+      const newRowValues = worksheet.columns.map((col) => newRow[col.key]);
+      let duplicate = false;
+      for (let i = 1; i < worksheet.rowCount+1; i++) {
+        if (_.isEqual(newRowValues, worksheet.getRow(i).values.splice(1))) {
+          duplicate = true;
+          break;
+        }
+      }
+      if (!duplicate) worksheet.addRow(newRow);
     });
   });
 };
