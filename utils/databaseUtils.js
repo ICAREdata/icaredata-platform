@@ -3,7 +3,7 @@ const {getSecret} = require('./getSecret');
 
 const getDatabaseConfiguration = async (login) => {
   const secret = await getSecret(login);
-  const caFileName = process.env.CA_FILE_NAME || 'rds-ca-2019-root.pem';
+  const caFileName = process.env.CA_FILE_NAME || 'us-east-1-bundle.pem';
   return {
     client: 'pg',
     connection: {

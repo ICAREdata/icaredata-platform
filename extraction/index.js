@@ -64,7 +64,7 @@ const getDiseaseStatusResources = (bundle) => {
       'Observation',
       {},
       false,
-  ).filter((r) => r.code && r.code.coding.filter((c) => c).some((c) => c.system === 'http://loinc.org' && c.code === '88040-1'));
+  ).filter((r) => r.code && r.code.coding.filter((c) => c).some((c) => c.system === 'http://loinc.org' && c.code === '97509-4'));
 };
 
 // Retrieves condition resource by looking at ids and identifiers on focus reference
