@@ -58,13 +58,17 @@ const translateCode = (codeObject) => {
 };
 
 // Filters Observation list for system and code specific to disease status
-const getDiseaseStatusResources = (bundle) => {
-  return getBundleResourcesByType(
-      bundle,
-      'Observation',
-      {},
-      false,
-  ).filter((r) => r.code && r.code.coding.filter((c) => c).some((c) => c.system === 'http://loinc.org' && c.code === '97509-4'));
+const getDiseaseStatusResources = bundle => {
+  return getBundleResourcesByType(bundle, 'Observation', {}, false).filter(
+    r =>
+      r.code &&
+      r.code.coding
+        .filter(c => c)
+        // Observations must contain a LOINC coding with STU1 (88040-1) or STU2 (97509-4) CDS code
+        .some(c => {
+          c.system === 'http://loinc.org' && (c.code === '97509-4' || c.code === '88040-1');
+        })
+  );
 };
 
 // Retrieves condition resource by looking at ids and identifiers on focus reference
