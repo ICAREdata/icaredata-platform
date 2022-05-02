@@ -66,7 +66,7 @@ const getDiseaseStatusResources = bundle => {
         .filter(c => c)
         // Observations must contain a LOINC coding with STU1 (88040-1) or STU2 (97509-4) CDS code
         .some(c => {
-          c.system === 'http://loinc.org' && (c.code === '97509-4' || c.code === '88040-1');
+          return c.system === 'http://loinc.org' && (c.code === '97509-4' || c.code === '88040-1');
         })
   );
 };
@@ -88,6 +88,7 @@ const addDiseaseStatusDataToWorksheet = (bundle, worksheet, trialData) => {
   const bundleId = fhirpath.evaluate(bundle, 'Bundle.id')[0];
 
   const dsResources = getDiseaseStatusResources(bundle);
+  console.log(`${dsResources.length} Cancer Disese Status Resources found on Bundle ${bundleId}.`);
   dsResources.forEach((resource) => {
     const evidenceExtensions = getExtensionsByUrl(
         fhirpath.evaluate(resource, 'Observation.extension'),
@@ -183,6 +184,8 @@ const addCarePlanDataToWorksheet = (bundle, worksheet, trialData) => {
       {},
       false,
   );
+  console.log(`${carePlanResources.length} CarePlan Resources found on Bundle ${bundleId}.`);
+
   carePlanResources.forEach((resource) => {
     const extensionData = getCarePlanDataFromExtensions(resource, bundleId);
 
