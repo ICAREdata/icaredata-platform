@@ -24,6 +24,8 @@ const createIcareWorkbook = () => {
   // Create separate worksheets
   const diseaseStatusWorksheet = workbook.addWorksheet('Disease Status');
   diseaseStatusWorksheet.columns = [
+    {header: "Submission Date", key: "submissionDate", width: 30},
+    {header: "Bundle ID", key: "bundleId", width: 30},
     {header: 'Effective Date', key: 'effectiveDate', width: 30},
     {header: 'Code Value', key: 'codeValue', width: 30},
     {header: 'Cancer Type', key: 'cancerType', width: 30},
@@ -38,6 +40,8 @@ const createIcareWorkbook = () => {
       'Treatment Plan Change',
   );
   treatmentPlanChangeWorksheet.columns = [
+    {header: "Submission Date", key: "submissionDate", width: 30},
+    {header: "Bundle ID", key: "bundleId", width: 30},
     {header: 'Effective Date', key: 'effectiveDate', width: 30},
     {header: 'Changed Flag', key: 'changedFlag', width: 30},
     {header: 'Code Value', key: 'codeValue', width: 30},
@@ -224,6 +228,8 @@ const processData = (data, workbook) => {
       subject_id: subjectId,
       trial_id: trialId,
       site_id: siteId,
+      submission_time: submissionDate,
+      bundle_id: bundleId
     } = d;
 
     const containedBundle = getBundleResourcesByType(
@@ -233,7 +239,7 @@ const processData = (data, workbook) => {
         true,
     );
 
-    const trialData = {subjectId, trialId, siteId};
+    const trialData = {subjectId, trialId, siteId,submissionDate,bundleId};
     addIcareDataToWorkbook(containedBundle, workbook, trialData);
   });
 };
