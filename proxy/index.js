@@ -12,7 +12,7 @@ function generateQueryUrl(params) {
     return process.env.OAUTH_SERVER_PATH;
   }
   return process.env.OAUTH_SERVER_PATH + '?' + querystring.stringify(params);
-};
+}
 
 /**
  * Generate request options based on env variables and search params
@@ -38,33 +38,34 @@ function generateOptions(params) {
   }
 
   return options;
-};
+}
 
 exports.handler = async (event) => {
   const options = generateOptions(event.queryStringParameters);
 
-
   return new Promise((accept, reject) => {
-    const req = https.request(options, (resp) => {
-      let data = '';
-      // A chunk of data has been received.
-      resp.on('data', (chunk) => {
-        data += chunk;
-      });
+    const req = https
+      .request(options, (resp) => {
+        let data = '';
+        // A chunk of data has been received.
+        resp.on('data', (chunk) => {
+          data += chunk;
+        });
 
-      // The whole response has been received. Print out the result.
-      resp.on('end', () => {
+        // The whole response has been received. Print out the result.
+        resp.on('end', () => {
+          accept({
+            statusCode: 200,
+            body: JSON.stringify(data),
+          });
+        });
+      })
+      .on('error', (err) => {
         accept({
           statusCode: 200,
-          body: JSON.stringify(data),
+          body: JSON.stringify(err),
         });
       });
-    }).on('error', (err) => {
-      accept({
-        statusCode: 200,
-        body: JSON.stringify(err),
-      });
-    });
 
     req.write(event.body);
     req.end();

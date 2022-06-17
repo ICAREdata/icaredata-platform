@@ -24,8 +24,10 @@ const checkCodeInVS = (condition, valueSet) => {
   return coding.some((c) => {
     return valueSet.compose.include.some((includeItem) => {
       if (!c || !includeItem || !includeItem.concept) return false;
-      return c.system === includeItem.system &&
-        includeItem.concept.map((concept) => concept.code).includes(c.code);
+      return (
+        c.system === includeItem.system &&
+        includeItem.concept.map((concept) => concept.code).includes(c.code)
+      );
     });
   });
 };
@@ -36,7 +38,9 @@ const checkCodeInVS = (condition, valueSet) => {
  * @return {string} primary or secondary
  */
 const getCancerType = (condition) => {
-  return checkCodeInVS(condition, secondaryCancerConditionVS) ? 'secondary' : 'primary';
+  return checkCodeInVS(condition, secondaryCancerConditionVS)
+    ? 'secondary'
+    : 'primary';
 };
 
 module.exports = {

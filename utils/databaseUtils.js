@@ -1,5 +1,5 @@
 const fs = require('fs');
-const {getSecret} = require('./getSecret');
+const { getSecret } = require('./getSecret');
 
 const getDatabaseConfiguration = async (login) => {
   const secret = await getSecret(login);

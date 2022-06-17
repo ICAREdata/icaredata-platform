@@ -1,281 +1,281 @@
 [
-    {
-        "bundle_id": "1",
-        "bundle": {
+  {
+    "bundle_id": "1",
+    "bundle": {
+      "resourceType": "Bundle",
+      "type": "message",
+      "entry": [
+        {
+          "resource": {
             "resourceType": "Bundle",
-            "type": "message",
             "entry": [
-                {
-                    "resource": {
-                        "resourceType": "Bundle",
-                        "entry": [
-                            {
-                                "resource": {
-                                    "resourceType": "Observation",
-                                    "extension": [
-                                        {
-                                            "url": "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-evidence-type",
-                                            "valueCodeableConcept": {
-                                                "coding": [
-                                                    {
-                                                        "system": "http://snomed.info/sct",
-                                                        "code": "252416005"
-                                                    }
-                                                ]
-                                            }
-                                        }
-                                    ],
-                                    "code": {
-                                        "coding": [
-                                            {
-                                                "system": "http://loinc.org",
-                                                "code": "88040-1"
-                                            }
-                                        ]
-                                    },
-                                    "focus": [
-                                        {
-                                            "reference": "Condition/primary"
-                                        }
-                                    ],
-                                    "effectiveDateTime": "2019-04-01",
-                                    "valueCodeableConcept": {
-                                        "coding": [
-                                            {
-                                                "system": "http://snomed.info/sct",
-                                                "code": "268910001"
-                                            }
-                                        ]
-                                    }
-                                }
-                            },
-                            {
-                                "resource": {
-                                    "resourceType": "Observation",
-                                    "extension": [
-                                        {
-                                            "url": "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-evidence-type",
-                                            "valueCodeableConcept": {
-                                                "coding": [
-                                                    {
-                                                        "system": "http://snomed.info/sct",
-                                                        "code": "252416005"
-                                                    }
-                                                ]
-                                            }
-                                        }
-                                    ],
-                                    "code": {
-                                        "coding": [
-                                            {
-                                                "system": "http://loinc.org",
-                                                "code": "88040-1"
-                                            }
-                                        ]
-                                    },
-                                    "focus": [
-                                        {
-                                            "reference": "Condition/secondary"
-                                        }
-                                    ],
-                                    "effectiveDateTime": "2019-04-01",
-                                    "valueCodeableConcept": {
-                                        "coding": [
-                                            {
-                                                "system": "http://snomed.info/sct",
-                                                "code": "268910001"
-                                            }
-                                        ]
-                                    }
-                                }
-                            },
-                            {
-                                "resource": {
-                                    "resourceType": "Condition",
-                                    "id": "primary",
-                                    "code": {
-                                        "coding": [
-                                            {
-                                                "system": "http://snomed.info/sct",
-                                                "code": "254637007"
-                                            },
-                                            {
-                                                "system": "http://hl7.org/fhir/sid/icd-10-cm",
-                                                "code": "C50.211",
-                                                "display": "Malignant neoplasm of upper-inner quadrant of right female breast"
-                                            }
-                                        ]
-                                    }
-                                }
-                            },
-                            {
-                                "resource": {
-                                    "resourceType": "Condition",
-                                    "id": "secondary",
-                                    "code": {
-                                        "coding": [
-                                            {
-                                                "system": "http://snomed.info/sct",
-                                                "code": "94225005"
-                                            },
-                                            {
-                                                "system": "http://hl7.org/fhir/sid/icd-10-cm",
-                                                "code": "C79.81",
-                                                "display": "Secondary malignant neoplasm of breast"
-                                            }
-                                        ]
-                                    }
-                                }
-                            },
-                            {
-                                "resource": {
-                                    "resourceType": "CarePlan",
-                                    "extension": [
-                                        {
-                                            "url": "http://mcodeinitiative.org/codex/us/icare/StructureDefinition/icare-care-plan-review",
-                                            "extension": [
-                                                {
-                                                    "url": "ChangedFlag",
-                                                    "valueBoolean": true
-                                                },
-                                                {
-                                                    "url": "ReviewDate",
-                                                    "valueDate": "2020-01-23"
-                                                },
-                                                {
-                                                    "url": "CarePlanChangeReason",
-                                                    "valueCodeableConcept": {
-                                                        "coding": [
-                                                            {
-                                                                "system": "http://snomed.info/sct",
-                                                                "code": "405613005"
-                                                            }
-                                                        ]
-                                                    }
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "url": "http://mcodeinitiative.org/codex/us/icare/StructureDefinition/icare-care-plan-review",
-                                            "extension": [
-                                                {
-                                                    "url": "ChangedFlag",
-                                                    "valueBoolean": false
-                                                },
-                                                {
-                                                    "url": "ReviewDate",
-                                                    "valueDate": "2020-02-23"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            }
+              {
+                "resource": {
+                  "resourceType": "Observation",
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-evidence-type",
+                      "valueCodeableConcept": {
+                        "coding": [
+                          {
+                            "system": "http://snomed.info/sct",
+                            "code": "252416005"
+                          }
                         ]
+                      }
                     }
+                  ],
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://loinc.org",
+                        "code": "88040-1"
+                      }
+                    ]
+                  },
+                  "focus": [
+                    {
+                      "reference": "Condition/primary"
+                    }
+                  ],
+                  "effectiveDateTime": "2019-04-01",
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "system": "http://snomed.info/sct",
+                        "code": "268910001"
+                      }
+                    ]
+                  }
                 }
+              },
+              {
+                "resource": {
+                  "resourceType": "Observation",
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-evidence-type",
+                      "valueCodeableConcept": {
+                        "coding": [
+                          {
+                            "system": "http://snomed.info/sct",
+                            "code": "252416005"
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://loinc.org",
+                        "code": "88040-1"
+                      }
+                    ]
+                  },
+                  "focus": [
+                    {
+                      "reference": "Condition/secondary"
+                    }
+                  ],
+                  "effectiveDateTime": "2019-04-01",
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "system": "http://snomed.info/sct",
+                        "code": "268910001"
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "resource": {
+                  "resourceType": "Condition",
+                  "id": "primary",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://snomed.info/sct",
+                        "code": "254637007"
+                      },
+                      {
+                        "system": "http://hl7.org/fhir/sid/icd-10-cm",
+                        "code": "C50.211",
+                        "display": "Malignant neoplasm of upper-inner quadrant of right female breast"
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "resource": {
+                  "resourceType": "Condition",
+                  "id": "secondary",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://snomed.info/sct",
+                        "code": "94225005"
+                      },
+                      {
+                        "system": "http://hl7.org/fhir/sid/icd-10-cm",
+                        "code": "C79.81",
+                        "display": "Secondary malignant neoplasm of breast"
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "resource": {
+                  "resourceType": "CarePlan",
+                  "extension": [
+                    {
+                      "url": "http://mcodeinitiative.org/codex/us/icare/StructureDefinition/icare-care-plan-review",
+                      "extension": [
+                        {
+                          "url": "ChangedFlag",
+                          "valueBoolean": true
+                        },
+                        {
+                          "url": "ReviewDate",
+                          "valueDate": "2020-01-23"
+                        },
+                        {
+                          "url": "CarePlanChangeReason",
+                          "valueCodeableConcept": {
+                            "coding": [
+                              {
+                                "system": "http://snomed.info/sct",
+                                "code": "405613005"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "url": "http://mcodeinitiative.org/codex/us/icare/StructureDefinition/icare-care-plan-review",
+                      "extension": [
+                        {
+                          "url": "ChangedFlag",
+                          "valueBoolean": false
+                        },
+                        {
+                          "url": "ReviewDate",
+                          "valueDate": "2020-02-23"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
             ]
-        },
-        "subject_id": "subjectId1",
-        "trial_id": "trialId1",
-        "site_id": "siteId1"
+          }
+        }
+      ]
     },
-    {
-        "bundle_id": "2",
-        "bundle": {
+    "subject_id": "subjectId1",
+    "trial_id": "trialId1",
+    "site_id": "siteId1"
+  },
+  {
+    "bundle_id": "2",
+    "bundle": {
+      "resourceType": "Bundle",
+      "type": "message",
+      "entry": [
+        {
+          "resource": {
             "resourceType": "Bundle",
-            "type": "message",
             "entry": [
-                {
-                    "resource": {
-                        "resourceType": "Bundle",
-                        "entry": [
-                            {
-                                "resource": {
-                                    "resourceType": "Observation",
-                                    "extension": [
-                                        {
-                                            "url": "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-evidence-type",
-                                            "valueCodeableConcept": {
-                                                "coding": [
-                                                    {
-                                                        "system": "http://snomed.info/sct",
-                                                        "code": "252416005"
-                                                    }
-                                                ]
-                                            }
-                                        }
-                                    ],
-                                    "code": {
-                                        "coding": [
-                                            {
-                                                "system": "http://loinc.org",
-                                                "code": "88040-1"
-                                            }
-                                        ]
-                                    },
-                                    "focus": [
-                                        {
-                                            "reference": "Condition/primary"
-                                        }
-                                    ],
-                                    "effectiveDateTime": "2019-04-01",
-                                    "valueCodeableConcept": {
-                                      "extension": [
-                                        {
-                                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
-                                          "valueCode": "not-asked"
-                                        }
-                                      ]
-                                    }
-                                }
-                            },
-                            {
-                                "resource": {
-                                    "resourceType": "Condition",
-                                    "id": "primary",
-                                    "code": {
-                                        "coding": [
-                                            {
-                                                "system": "http://snomed.info/sct",
-                                                "code": "254637007"
-                                            },
-                                            {
-                                                "system": "http://hl7.org/fhir/sid/icd-10-cm",
-                                                "code": "C50.211",
-                                                "display": "Malignant neoplasm of upper-inner quadrant of right female breast"
-                                            }
-                                        ]
-                                    }
-                                }
-                            },
-                            {
-                                "resource": {
-                                    "resourceType": "CarePlan",
-                                    "extension": [
-                                        {
-                                            "url": "http://mcodeinitiative.org/codex/us/icare/StructureDefinition/icare-care-plan-review",
-                                            "extension": [
-                                                {
-                                                    "url": "ChangedFlag",
-                                                    "valueBoolean": false
-                                                },
-                                                {
-                                                    "url": "ReviewDate",
-                                                    "valueDate": "2020-02-23"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            }
+              {
+                "resource": {
+                  "resourceType": "Observation",
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-evidence-type",
+                      "valueCodeableConcept": {
+                        "coding": [
+                          {
+                            "system": "http://snomed.info/sct",
+                            "code": "252416005"
+                          }
                         ]
+                      }
                     }
+                  ],
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://loinc.org",
+                        "code": "88040-1"
+                      }
+                    ]
+                  },
+                  "focus": [
+                    {
+                      "reference": "Condition/primary"
+                    }
+                  ],
+                  "effectiveDateTime": "2019-04-01",
+                  "valueCodeableConcept": {
+                    "extension": [
+                      {
+                        "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                        "valueCode": "not-asked"
+                      }
+                    ]
+                  }
                 }
+              },
+              {
+                "resource": {
+                  "resourceType": "Condition",
+                  "id": "primary",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://snomed.info/sct",
+                        "code": "254637007"
+                      },
+                      {
+                        "system": "http://hl7.org/fhir/sid/icd-10-cm",
+                        "code": "C50.211",
+                        "display": "Malignant neoplasm of upper-inner quadrant of right female breast"
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "resource": {
+                  "resourceType": "CarePlan",
+                  "extension": [
+                    {
+                      "url": "http://mcodeinitiative.org/codex/us/icare/StructureDefinition/icare-care-plan-review",
+                      "extension": [
+                        {
+                          "url": "ChangedFlag",
+                          "valueBoolean": false
+                        },
+                        {
+                          "url": "ReviewDate",
+                          "valueDate": "2020-02-23"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
             ]
-        },
-        "subject_id": "subjectId2",
-        "trial_id": "trialId2",
-        "site_id": "siteId2"
-    }
+          }
+        }
+      ]
+    },
+    "subject_id": "subjectId2",
+    "trial_id": "trialId2",
+    "site_id": "siteId2"
+  }
 ]

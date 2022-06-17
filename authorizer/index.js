@@ -1,10 +1,13 @@
 const https = require('https');
 const querystring = require('querystring');
-const {getSecret} = require('../utils/getSecret.js');
+const { getSecret } = require('../utils/getSecret.js');
 
 exports.handler = async (event) => {
   const secret = await getSecret('Keycloak-Authorizer');
-  const options = generateOptionsWithAuthHeader(secret.username, secret.password);
+  const options = generateOptionsWithAuthHeader(
+    secret.username,
+    secret.password
+  );
 
   return new Promise((accept, reject) => {
     const req = https.request(options, (resp) => {
@@ -33,14 +36,15 @@ exports.handler = async (event) => {
       });
     });
     const post = querystring.stringify({
-      token: formatToken(event.authorizationToken || event.headers.Authorization),
+      token: formatToken(
+        event.authorizationToken || event.headers.Authorization
+      ),
       token_type_hint: 'requesting_party_token',
     });
     req.write(post);
     req.end();
   });
 };
-
 
 /**
  * Generate request options based on env variables and a username/pass
@@ -50,8 +54,7 @@ exports.handler = async (event) => {
  * @return {Object} An options object for requests with auth header
  */
 function generateOptionsWithAuthHeader(username, password) {
-  const authHeader =
-    Buffer.from(`${username}:${password}`).toString('base64');
+  const authHeader = Buffer.from(`${username}:${password}`).toString('base64');
   const options = {
     hostname: process.env.OAUTH_SERVER_HOST,
     port: process.env.OAUTH_SERVER_PORT,
@@ -59,7 +62,7 @@ function generateOptionsWithAuthHeader(username, password) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': `Basic ${authHeader}`,
+      Authorization: `Basic ${authHeader}`,
       'X-Forwarded-Host': process.env.FORWARDED_HOST || 'testing.icaredata.org',
     },
   };
@@ -80,7 +83,7 @@ function generateOptionsWithAuthHeader(username, password) {
  */
 function formatToken(token) {
   return token.replace('Bearer ', '');
-};
+}
 
 /**
  * Generate an IAM policy
@@ -113,4 +116,4 @@ function generatePolicy(principalId, effect, resource) {
   //     "booleanKey": true
   // };
   return authResponse;
-};
+}

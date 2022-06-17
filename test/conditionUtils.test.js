@@ -1,12 +1,12 @@
 const rewire = require('rewire');
-const {expect} = require('chai');
+const { expect } = require('chai');
 const conditionUtils = rewire('../utils/conditionUtils');
 const exampleSecondaryCondition = require('./fixtures/conditionUtils/exampleSecondaryCondition.json');
 const secondaryCancerConditionVS = require('../utils/valueSets/ValueSet-mcode-secondary-cancer-disorder-vs.json');
 
 describe('Condition Utility', () => {
   describe('getCancerType', () => {
-    const {getCancerType} = conditionUtils;
+    const { getCancerType } = conditionUtils;
     it('Should return secondary', () => {
       const cancerType = getCancerType(exampleSecondaryCondition);
       expect(cancerType).to.equal('secondary');
@@ -67,34 +67,52 @@ describe('Condition Utility', () => {
     };
 
     it('should return true with snomed code in value set', () => {
-      const response = checkCodeInVS(exampleSnomedCondition, secondaryCancerConditionVS);
+      const response = checkCodeInVS(
+        exampleSnomedCondition,
+        secondaryCancerConditionVS
+      );
       expect(response).to.be.true;
     });
 
     it('should return true with icd-10 code in value set', () => {
-      const response = checkCodeInVS(exampleIcdCondition, secondaryCancerConditionVS);
+      const response = checkCodeInVS(
+        exampleIcdCondition,
+        secondaryCancerConditionVS
+      );
       expect(response).to.be.true;
     });
 
     it('should return false with code not in value set', () => {
-      const response = checkCodeInVS(exampleConditionWithBadCode, secondaryCancerConditionVS);
+      const response = checkCodeInVS(
+        exampleConditionWithBadCode,
+        secondaryCancerConditionVS
+      );
       expect(response).to.be.false;
     });
 
     it('should return false with wrong system', () => {
-      const response = checkCodeInVS(exampleConditionWithBadSystem, secondaryCancerConditionVS);
+      const response = checkCodeInVS(
+        exampleConditionWithBadSystem,
+        secondaryCancerConditionVS
+      );
       expect(response).to.be.false;
     });
 
     it('should check valueSet.compose if expansion not in valueSet', () => {
-      const valueSetWithoutExpansion = {...secondaryCancerConditionVS};
+      const valueSetWithoutExpansion = { ...secondaryCancerConditionVS };
       delete valueSetWithoutExpansion.expansion;
 
       // Snomed codes are only included in value set with expansion
-      expect(checkCodeInVS(exampleSnomedCondition, valueSetWithoutExpansion)).to.be.false;
-      expect(checkCodeInVS(exampleIcdCondition, valueSetWithoutExpansion)).to.be.true;
-      expect(checkCodeInVS(exampleConditionWithBadCode, valueSetWithoutExpansion)).to.be.false;
-      expect(checkCodeInVS(exampleConditionWithBadSystem, valueSetWithoutExpansion)).to.be.false;
+      expect(checkCodeInVS(exampleSnomedCondition, valueSetWithoutExpansion)).to
+        .be.false;
+      expect(checkCodeInVS(exampleIcdCondition, valueSetWithoutExpansion)).to.be
+        .true;
+      expect(
+        checkCodeInVS(exampleConditionWithBadCode, valueSetWithoutExpansion)
+      ).to.be.false;
+      expect(
+        checkCodeInVS(exampleConditionWithBadSystem, valueSetWithoutExpansion)
+      ).to.be.false;
     });
   });
 });

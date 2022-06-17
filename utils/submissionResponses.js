@@ -1,10 +1,10 @@
-const {v4} = require('uuid');
+const { v4 } = require('uuid');
 
 module.exports = {
   response200: (originalMessageId) => {
     const bundleId = v4();
     const messageHeaderId = v4();
-    const messageTimeStamp = (new Date()).toISOString();
+    const messageTimeStamp = new Date().toISOString();
     return JSON.stringify({
       resourceType: 'Bundle',
       id: bundleId,
@@ -29,10 +29,11 @@ module.exports = {
       ],
     });
   },
-  response400: (originalMessageId, errorMessage) => { // Takes a message argument
+  response400: (originalMessageId, errorMessage) => {
+    // Takes a message argument
     const bundleId = v4();
     const messageHeaderId = v4();
-    const messageTimeStamp = (new Date()).toISOString();
+    const messageTimeStamp = new Date().toISOString();
     const operationOutcomeId = v4();
     return JSON.stringify({
       resourceType: 'Bundle',
@@ -78,7 +79,7 @@ module.exports = {
   response500: (originalMessageId) => {
     const bundleId = v4();
     const messageHeaderId = v4();
-    const messageTimeStamp = (new Date()).toISOString();
+    const messageTimeStamp = new Date().toISOString();
     const operationOutcomeId = v4();
     return JSON.stringify({
       resourceType: 'Bundle',
