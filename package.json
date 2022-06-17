@@ -23,6 +23,7 @@
     "archiver-zip-encrypted": "^1.0.8",
     "aws-sdk": "^2.594.0",
     "dotenv": "^8.2.0",
+    "eslint-config-prettier": "^8.5.0",
     "exceljs": "^3.8.1",
     "fhirpath": "^2.1.5",
     "fs": "0.0.1-security",
@@ -37,8 +38,9 @@
   "devDependencies": {
     "axios": "^0.21.1",
     "chai": "^4.2.0",
-    "eslint": "^6.6.0",
+    "eslint": "^7.32.0",
     "eslint-config-google": "^0.14.0",
+    "eslint-plugin-prettier": "^4.0.0",
     "grunt": "^1.0.4",
     "mocha": "^6.2.2",
     "nock": "12.0.2"
