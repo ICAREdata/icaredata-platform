@@ -12,17 +12,22 @@ npm install
 
 ## Run the Test Suite
 
-_NOTE_ The test suite as currently implemented is outdated. There will be an updated test suite providing unit tests for the individual Lambda functions in the near future.
-
 To run the test suite for this repository, run the following command.
 
 ```bash
 npm test
 ```
 
-## Deploying to AWS
+## Linting
 
-Currently, the Terraform scripts are not configured for automatic deployment. The Lambda functions are manually deployed through the AWS console instead, by uploading a `.zip` file.
+This project is formatted using [Prettier](https://prettier.io/docs/en/index.html) and [ESLint](https://eslint.org). It is recomended that contributors make use of the following commands before pushing commits to this repository, as linting errors will cause CI builds to fail.
+
+| Command      | Effect                                                                    |
+| ------------ | ------------------------------------------------------------------------- |
+| **lint**     | Checks all .js files to ensure they follow project code styles and rules. |
+| **lint-fix** | Fixes lint errors when automatic fixes are available for them.            |
+
+## Deploying to AWS
 
 In order to build the relevant .zip files to deploy the Lambda functions, the following commands are provided:
 
@@ -35,6 +40,10 @@ In order to build the relevant .zip files to deploy the Lambda functions, the fo
 | `npm run build-extraction`  | Builds Data Extraction Lambda to a .zip file in the `terraform/build` directory.     |
 | `npm run build-message`     | Builds Process Message Lambda to a .zip file in the `terraform/build` directory.     |
 | `npm run build-proxy`       | Builds Keycloak Proxy Lambda to a .zip file in the `terraform/build` directory.      |
+
+### Deploying using Terraform
+
+After building .zip files for each of the above Lambda functions, the environment can be deployed to AWS using the terraform scripts found in the `terraform` directory. Instructions for installing and running Terraform can be found [here](https://learn.hashicorp.com/tutorials/terraform/infrastructure-as-code?in=terraform/aws-get-started).
 
 ## Setting Environment Variables
 
