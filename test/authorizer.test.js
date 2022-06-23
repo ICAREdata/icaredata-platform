@@ -1,17 +1,22 @@
 const rewire = require('rewire');
-const {expect} = require('chai');
+const { expect } = require('chai');
 const requestOptsWithAuthHeader = require('./fixtures/authorizer/requestOptsWithAuthHeader.json');
 const policy = require('./fixtures/authorizer/policy.json');
 const policyWithoutDocument = require('./fixtures/authorizer/policyWithoutDocument.json');
 const authorizerModule = rewire('../authorizer');
 
 describe('Authorizer', async () => {
-  const generateOptionsWithAuthHeader = authorizerModule.__get__('generateOptionsWithAuthHeader');
+  const generateOptionsWithAuthHeader = authorizerModule.__get__(
+    'generateOptionsWithAuthHeader'
+  );
   describe('generateOptionsWithAuthHeader', async () => {
     it('should work', () => {
       const username = 'test-username';
       const password = 'test-password';
-      const generatedRequestOptions = generateOptionsWithAuthHeader(username, password);
+      const generatedRequestOptions = generateOptionsWithAuthHeader(
+        username,
+        password
+      );
       expect(generatedRequestOptions).to.eql(requestOptsWithAuthHeader);
     });
   });
@@ -39,7 +44,11 @@ describe('Authorizer', async () => {
       const examplePrincipalId = 'examplePrincipalId';
       const exampleEffect = 'exampleEffect';
       const exampleResource = 'exampleResource';
-      const policyResp = await generatePolicy(examplePrincipalId, exampleEffect, exampleResource);
+      const policyResp = await generatePolicy(
+        examplePrincipalId,
+        exampleEffect,
+        exampleResource
+      );
       expect(policyResp).to.eql(policy);
     });
 
@@ -47,9 +56,21 @@ describe('Authorizer', async () => {
       const examplePrincipalId = 'examplePrincipalId';
       const exampleEffect = 'exampleEffect';
       const exampleResource = 'exampleResource';
-      const policyWithoutResource = await generatePolicy(examplePrincipalId, exampleEffect, undefined);
-      const policyWithoutEffect = await generatePolicy(examplePrincipalId, undefined, exampleResource);
-      const policyWithoutBoth = await generatePolicy(examplePrincipalId, undefined, undefined);
+      const policyWithoutResource = await generatePolicy(
+        examplePrincipalId,
+        exampleEffect,
+        undefined
+      );
+      const policyWithoutEffect = await generatePolicy(
+        examplePrincipalId,
+        undefined,
+        exampleResource
+      );
+      const policyWithoutBoth = await generatePolicy(
+        examplePrincipalId,
+        undefined,
+        undefined
+      );
       expect(policyWithoutResource).to.eql(policyWithoutDocument);
       expect(policyWithoutEffect).to.eql(policyWithoutDocument);
       expect(policyWithoutBoth).to.eql(policyWithoutDocument);

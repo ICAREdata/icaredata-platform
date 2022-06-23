@@ -8,15 +8,24 @@ resource "aws_api_gateway_method" "process_message" {
   rest_api_id   = aws_api_gateway_rest_api.gateway.id
   resource_id   = aws_api_gateway_resource.process_message.id
   http_method   = "POST"
-  authorization = "NONE"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.authorizer.id
 }
 
 resource "aws_lambda_function" "process_message" {
   filename      = "build/process-message.zip"
   function_name = "ProcessMessage"
   handler       = "process-message/index.handler"
-  runtime       = "nodejs10.x"
+  runtime       = "nodejs12.x"
   role          = aws_iam_role.lambda_exec.arn
+
+  environment {
+    variables = {
+      "DATABASE_HOST" = "${var.database_host}",
+      "DATABASE_PORT" = "5432"
+    }
+  }
+
 }
 
 resource "aws_api_gateway_integration" "process_message" {
@@ -25,7 +34,7 @@ resource "aws_api_gateway_integration" "process_message" {
   http_method = aws_api_gateway_method.process_message.http_method
 
   integration_http_method = "POST"
-  type                    = "AWS_PROXY"
+  type                    = "AWS"
   uri                     = aws_lambda_function.process_message.invoke_arn
 }
 

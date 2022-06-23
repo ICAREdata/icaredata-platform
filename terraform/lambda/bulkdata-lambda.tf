@@ -21,8 +21,16 @@ resource "aws_lambda_function" "bulkdata" {
   filename      = "build/bulkdata.zip"
   function_name = "Bulkdata"
   handler       = "bulkdata/index.handler"
-  runtime       = "nodejs10.x"
+  runtime       = "nodejs12.x"
   role          = aws_iam_role.lambda_exec.arn
+
+  environment {
+    variables = {
+      "TOKEN_ENDPOINT" = "${var.bulk_data_token_endpoint}"
+    }
+  }
+
+
 }
 
 resource "aws_api_gateway_integration" "bulkdata" {
@@ -31,9 +39,26 @@ resource "aws_api_gateway_integration" "bulkdata" {
   http_method = aws_api_gateway_method.bulkdata.http_method
 
   integration_http_method = "POST"
-  type                    = "AWS_PROXY"
+  type                    = "AWS"
   uri                     = aws_lambda_function.bulkdata.invoke_arn
 }
+
+resource "aws_api_gateway_method_response" "bulk_data_response_200" {
+  rest_api_id = aws_api_gateway_rest_api.gateway.id
+  resource_id = aws_api_gateway_resource.bulkdata.id
+  http_method = aws_api_gateway_method.bulkdata.http_method
+  status_code = "200"
+
+}
+
+resource "aws_api_gateway_integration_response" "bulk_data_response" {
+  rest_api_id = aws_api_gateway_rest_api.gateway.id
+  resource_id = aws_api_gateway_resource.bulkdata.id
+  http_method = aws_api_gateway_method.bulkdata.http_method
+  status_code = aws_api_gateway_method_response.bulk_data_response_200.status_code
+  depends_on  = [aws_api_gateway_integration.bulkdata]
+}
+
 
 resource "aws_api_gateway_deployment" "bulkdata" {
   depends_on = [

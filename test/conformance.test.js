@@ -1,5 +1,5 @@
-const {expect} = require('chai');
-const {handler} = require('../conformance');
+const { expect } = require('chai');
+const { handler } = require('../conformance');
 
 describe('Metadata', async () => {
   describe('handler', async () => {
