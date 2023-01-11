@@ -27,7 +27,7 @@
     "exceljs": "^3.8.1",
     "fhirpath": "^2.1.5",
     "fs": "0.0.1-security",
-    "knex": "^0.19.5",
+    "knex": "^2.4.0",
     "lodash": "^4.17.21",
     "node-forge": "^0.10.0",
     "node-jose": "^2.0.0",
