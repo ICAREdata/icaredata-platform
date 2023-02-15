@@ -184,7 +184,6 @@ describe('Extraction', () => {
       expect(dsNotAskedRow.getCell('codeValue').text).to.equal('not-asked');
     });
     it('adds rows to treatment plan change worksheet', () => {
-      // > CarePlan Checks
       // Header + 1 careplan extension from each bundle
       expect(treatmentPlanChangeWorksheet.rowCount).to.equal(4);
       const tpRow = treatmentPlanChangeWorksheet.getRow(4);
@@ -200,7 +199,6 @@ describe('Extraction', () => {
       expect(tpRow.getCell('siteId').text).to.equal(expectedTpRow.siteId);
     });
     it('adds rows to adverse events worksheet', () => {
-      // > AdverseEvent Checks
       // Header + 1 AE from the first bundle only
       expect(adverseEventWorksheet.rowCount).to.equal(2);
       const aeRow = adverseEventWorksheet.getRow(2);
