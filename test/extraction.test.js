@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const { expect } = require('chai');
 const rewire = require('rewire');
 const extraction = rewire('../extraction');
@@ -58,12 +59,12 @@ describe('Extraction', () => {
     };
     const bundle = { resourceType: 'Bundle' };
 
-    it('returns an empty array', () => {
+    it('returns an empty array when an observation without the correct code is supplied', () => {
       bundle.entry = [{ resource: observationWithoutCode }];
       expect(getDiseaseStatusResources(bundle)).to.be.empty;
     });
 
-    it('returns array with disease status', () => {
+    it('returns array with only disease status observations', () => {
       bundle.entry = [{ resource: observationWithCode }];
       expect(getDiseaseStatusResources(bundle)).to.have.length(1);
 
@@ -75,24 +76,39 @@ describe('Extraction', () => {
   });
 
   const workbook = createIcareWorkbook();
-  const diseaseStatusWorksheet = workbook.getWorksheet('Disease Status');
-  const treatmentPlanChangeWorksheet = workbook.getWorksheet(
-    'Treatment Plan Change'
+  // Clone these in case of race conditions with later modifications of worksheets
+  const diseaseStatusWorksheet = _.cloneDeep(
+    workbook.getWorksheet('Disease Status')
+  );
+  const treatmentPlanChangeWorksheet = _.cloneDeep(
+    workbook.getWorksheet('Treatment Plan Change')
+  );
+  const adverseEventWorksheet = _.cloneDeep(
+    workbook.getWorksheet('Adverse Event')
   );
   describe('createIcareWorkbook', () => {
-    it('creates workbook with Disease Status and Treatment Plan Change worksheets', () => {
+    it('creates workbook with Disease Status worksheet', () => {
       expect(diseaseStatusWorksheet).to.exist;
       expect(diseaseStatusWorksheet.columnCount).to.equal(10);
       expect(diseaseStatusWorksheet.rowCount).to.equal(1);
+    });
+    it('creates workbook with Treatment Plan Change worksheets', () => {
       expect(treatmentPlanChangeWorksheet).to.exist;
       expect(treatmentPlanChangeWorksheet.columnCount).to.equal(8);
       expect(treatmentPlanChangeWorksheet.rowCount).to.equal(1);
+    });
+    it('creates workbook with Adverse Event worksheets', () => {
+      expect(adverseEventWorksheet).to.exist;
+      expect(adverseEventWorksheet.columnCount).to.equal(13);
+      expect(adverseEventWorksheet.rowCount).to.equal(1);
+    });
+    it('does not create workbook with an unexpected worksheet', () => {
       expect(workbook.getWorksheet('Test Worksheet')).to.not.exist;
     });
   });
 
   describe('processData', () => {
-    expectedDsRow = {
+    const expectedDsRow = {
       submissionDate: '2019-04-01',
       bundleId: '1',
       effectiveDate: '2019-04-01',
@@ -106,7 +122,7 @@ describe('Extraction', () => {
       siteId: 'siteId1',
     };
 
-    expectedTpRow = {
+    const expectedTpRow = {
       submissionDate: '2019-04-01',
       bundleId: '2',
       effectiveDate: '2020-02-23',
@@ -117,9 +133,34 @@ describe('Extraction', () => {
       siteId: 'siteId2',
     };
 
-    it('adds rows to disease status and treatment plan change worksheets', () => {
-      processData(data, workbook);
+    const expectedAeRow = {
+      submissionDate: '2019-04-01',
+      bundleId: '1',
+      adverseEventCode: 'code-system : 109006',
+      suspectedCause: 'Procedure : urn:uuid:procedure-id',
+      seriousnessCode:
+        'http://terminology.hl7.org/CodeSystem/adverse-event-seriousness : serious',
+      categoryCode:
+        'http://terminology.hl7.org/CodeSystem/adverse-event-category : product-use-error',
+      severityCode:
+        'http://terminology.hl7.org/CodeSystem/adverse-event-severity : severe',
+      actuality: 'actual',
+      effectiveDate: '1994-12-09',
+      recordedDate: '1994-12-09',
+      subjectId: 'subjectId1',
+      trialId: 'trialId1',
+      siteId: 'siteId1',
+    };
 
+    // Process data should have side effects
+    processData(data, workbook);
+    // Local copies of the worksheets after data processing
+    const diseaseStatusWorksheet = workbook.getWorksheet('Disease Status');
+    const treatmentPlanChangeWorksheet = workbook.getWorksheet(
+      'Treatment Plan Change'
+    );
+    const adverseEventWorksheet = workbook.getWorksheet('Adverse Event');
+    it('adds rows to disease worksheet', () => {
       // Header + 2 disease statuses from 1st bundle + 1 disease status from 2nd
       expect(diseaseStatusWorksheet.rowCount).to.equal(4);
       const dsRow = diseaseStatusWorksheet.getRow(2);
@@ -141,7 +182,9 @@ describe('Extraction', () => {
       // A disease status bundle with a dataAbsentReason extension should have 'not-asked' in it's codeValue field
       const dsNotAskedRow = diseaseStatusWorksheet.getRow(4);
       expect(dsNotAskedRow.getCell('codeValue').text).to.equal('not-asked');
-
+    });
+    it('adds rows to treatment plan change worksheet', () => {
+      // > CarePlan Checks
       // Header + 1 careplan extension from each bundle
       expect(treatmentPlanChangeWorksheet.rowCount).to.equal(4);
       const tpRow = treatmentPlanChangeWorksheet.getRow(4);
@@ -155,6 +198,41 @@ describe('Extraction', () => {
       expect(tpRow.getCell('subjectId').text).to.equal(expectedTpRow.subjectId);
       expect(tpRow.getCell('trialId').text).to.equal(expectedTpRow.trialId);
       expect(tpRow.getCell('siteId').text).to.equal(expectedTpRow.siteId);
+    });
+    it('adds rows to adverse events worksheet', () => {
+      // > AdverseEvent Checks
+      // Header + 1 AE from the first bundle only
+      expect(adverseEventWorksheet.rowCount).to.equal(2);
+      const aeRow = adverseEventWorksheet.getRow(2);
+      expect(aeRow.getCell('submissionDate').text).to.equal(
+        expectedAeRow.submissionDate
+      );
+      expect(aeRow.getCell('bundleId').text).to.equal(expectedAeRow.bundleId);
+      expect(aeRow.getCell('adverseEventCode').text).to.equal(
+        expectedAeRow.adverseEventCode
+      );
+      expect(aeRow.getCell('suspectedCause').text).to.equal(
+        expectedAeRow.suspectedCause
+      );
+      expect(aeRow.getCell('seriousnessCode').text).to.equal(
+        expectedAeRow.seriousnessCode
+      );
+      expect(aeRow.getCell('categoryCode').text).to.equal(
+        expectedAeRow.categoryCode
+      );
+      expect(aeRow.getCell('severityCode').text).to.equal(
+        expectedAeRow.severityCode
+      );
+      expect(aeRow.getCell('actuality').text).to.equal(expectedAeRow.actuality);
+      expect(aeRow.getCell('effectiveDate').text).to.equal(
+        expectedAeRow.effectiveDate
+      );
+      expect(aeRow.getCell('recordedDate').text).to.equal(
+        expectedAeRow.recordedDate
+      );
+      expect(aeRow.getCell('subjectId').text).to.equal(expectedAeRow.subjectId);
+      expect(aeRow.getCell('trialId').text).to.equal(expectedAeRow.trialId);
+      expect(aeRow.getCell('siteId').text).to.equal(expectedAeRow.siteId);
     });
   });
 
