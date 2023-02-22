@@ -99,7 +99,7 @@ describe('Extraction', () => {
     });
     it('creates workbook with Adverse Event worksheets', () => {
       expect(adverseEventWorksheet).to.exist;
-      expect(adverseEventWorksheet.columnCount).to.equal(13);
+      expect(adverseEventWorksheet.columnCount).to.equal(17);
       expect(adverseEventWorksheet.rowCount).to.equal(1);
     });
     it('does not create workbook with an unexpected worksheet', () => {
@@ -136,20 +136,25 @@ describe('Extraction', () => {
     const expectedAeRow = {
       submissionDate: '2019-04-01',
       bundleId: '1',
+      adverseEventGrade:
+        '2 : http://hl7.org/fhir/us/ctcae/CodeSystem/ctcae-grade-code-system',
       adverseEventCode: 'code-system : 109006',
       suspectedCause: 'Procedure : urn:uuid:procedure-id',
       seriousnessCode:
         'http://terminology.hl7.org/CodeSystem/adverse-event-seriousness : serious',
       categoryCode:
         'http://terminology.hl7.org/CodeSystem/adverse-event-category : product-use-error',
-      severityCode:
-        'http://terminology.hl7.org/CodeSystem/adverse-event-severity : severe',
       actuality: 'actual',
       effectiveDate: '1994-12-09',
       recordedDate: '1994-12-09',
       subjectId: 'subjectId1',
       trialId: 'trialId1',
       siteId: 'siteId1',
+      seriousnessOutcome:
+        'C113380 : http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl',
+      resolvedDate: '2021-12-09',
+      suspectedCauseAssessments: '',
+      outcomeCode: '',
     };
 
     // Process data should have side effects
@@ -217,9 +222,6 @@ describe('Extraction', () => {
       );
       expect(aeRow.getCell('categoryCode').text).to.equal(
         expectedAeRow.categoryCode
-      );
-      expect(aeRow.getCell('severityCode').text).to.equal(
-        expectedAeRow.severityCode
       );
       expect(aeRow.getCell('actuality').text).to.equal(expectedAeRow.actuality);
       expect(aeRow.getCell('effectiveDate').text).to.equal(

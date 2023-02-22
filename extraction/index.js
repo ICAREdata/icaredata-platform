@@ -57,14 +57,22 @@ const createIcareWorkbook = () => {
   adverseEventWorksheet.columns = [
     { header: 'Submission Date', key: 'submissionDate', width: 30 },
     { header: 'Bundle ID', key: 'bundleId', width: 30 },
+    { header: 'Adverse Event Grade', key: 'adverseEventGrade', width: 30 },
     { header: 'Adverse Event Code', key: 'adverseEventCode', width: 30 },
     { header: 'Suspected Cause', key: 'suspectedCause', width: 30 },
+    {
+      header: 'Suspected Cause Assessments',
+      key: 'suspectedCauseAssessments',
+      width: 30,
+    },
     { header: 'Seriousness Code', key: 'seriousnessCode', width: 30 },
     { header: 'Category Code', key: 'categoryCode', width: 30 },
-    { header: 'Severity Code', key: 'severityCode', width: 30 },
     { header: 'Actuality', key: 'actuality', width: 30 },
     { header: 'Effective Date', key: 'effectiveDate', width: 30 },
     { header: 'Recorded Date', key: 'recordedDate', width: 30 },
+    { header: 'Outcome Code', key: 'outcomeCode', width: 30 },
+    { header: 'Seriousness Outcome', key: 'seriousnessOutcome', width: 30 },
+    { header: 'Resolved Date', key: 'resolvedDate', width: 30 },
     { header: 'Subject ID', key: 'subjectId', width: 30 },
     { header: 'Trial ID', key: 'trialId', width: 30 },
     { header: 'Site ID', key: 'siteId', width: 30 },
@@ -85,15 +93,25 @@ const translateCode = (codeObject) => {
 };
 
 const formatSuspectedCauseData = (suspectEntityList) => {
-  return suspectEntityList
+  // SuspectedEntities have two subcomponents of interest: instances and causality
+  const suspectedCauses = suspectEntityList
     ? suspectEntityList
-        .map(
-          (entity) =>
+        .map((entity) => {
+          return (
             entity.instance &&
             `${entity.instance.type} : ${entity.instance.reference}`
-        )
+          );
+        })
         .join(ARRAYJOINDELIMITER)
     : '';
+  const suspectedAssessments = suspectEntityList
+    ? suspectEntityList
+        .map((entity) => {
+          return entity.assessment && translateCode(entity.assessment);
+        })
+        .join(ARRAYJOINDELIMITER)
+    : '';
+  return [suspectedCauses, suspectedAssessments];
 };
 
 // Filters Observation list for system and code specific to disease status
@@ -272,6 +290,48 @@ const addCarePlanDataToWorksheet = (bundle, worksheet, trialData) => {
   });
 };
 
+const getAdverseEventDataFromExtensions = (adverseEventResource, bundleId) => {
+  const adverseEventResourceExtension = adverseEventResource.extension;
+  const gradeUrl =
+    'http://hl7.org/fhir/us/ctcae/StructureDefinition/ctcae-grade';
+  const resolvedDateUrl =
+    'http://hl7.org/fhir/us/ctcae/StructureDefinition/adverse-event-resolved-date';
+  const seriousnessOutcomeUrl =
+    'http://hl7.org/fhir/us/ctcae/StructureDefinition/adverse-event-seriousness-outcome';
+  const grade = getExtensionsByUrl(
+    adverseEventResourceExtension,
+    gradeUrl,
+    true
+  );
+  const resolvedDate = getExtensionsByUrl(
+    adverseEventResourceExtension,
+    resolvedDateUrl,
+    true
+  );
+  const seriousnessOutcome = getExtensionsByUrl(
+    adverseEventResourceExtension,
+    seriousnessOutcomeUrl,
+    true
+  );
+  if (!grade) {
+    console.log(`No grade extension was found on Bundle ${bundleId}`);
+  }
+  if (!resolvedDate) {
+    console.log(`No resolvedDate extension was found on Bundle ${bundleId}`);
+  }
+  if (!seriousnessOutcome) {
+    console.log(
+      `No seriousnessOutcome extension was found on Bundle ${bundleId}`
+    );
+  }
+  return {
+    grade: grade && translateCode(grade.value),
+    resolvedDate: resolvedDate && translateCode(resolvedDate.valueDateTime),
+    seriousnessOutcome:
+      seriousnessOutcome && translateCode(seriousnessOutcome.value),
+  };
+};
+
 // Add AdverseEvent resources to worksheet
 const addAdverseEventDataToWorksheet = (bundle, worksheet, trialData) => {
   const bundleId = fhirpath.evaluate(bundle, 'Bundle.id')[0];
@@ -289,16 +349,26 @@ const addAdverseEventDataToWorksheet = (bundle, worksheet, trialData) => {
   );
 
   adverseEventResources.forEach((resource) => {
+    // All data from extensions
+    const { grade, resolvedDate, seriousnessOutcome } =
+      getAdverseEventDataFromExtensions(resource, bundleId);
+
     // AdverseEvent data is a CodeableConcept
     const adverseEventCode = translateCode(resource.event);
     if (!adverseEventCode) {
       console.log('No code found on this Adverse Event Resource ');
     }
     // Suspected cause data
-    const suspectedCause = formatSuspectedCauseData(resource.suspectEntity);
+    const [suspectedCause, suspectedCauseAssessments] =
+      formatSuspectedCauseData(resource.suspectEntity);
     if (!suspectedCause) {
       console.log(
         'No suspected entity data found on this Adverse Event Resource '
+      );
+    }
+    if (!suspectedCauseAssessments) {
+      console.log(
+        'No suspected entity assessment data found on this Adverse Event Resource '
       );
     }
     // Seriousness data is a CodeableConcept
@@ -314,22 +384,27 @@ const addAdverseEventDataToWorksheet = (bundle, worksheet, trialData) => {
     if (!categoryCode || categoryCode.length === 0) {
       console.log('No category data found on this Adverse Event Resource ');
     }
-    // Severity data is a CodeableConcept
-    const severityCode = resource.severity && translateCode(resource.severity);
-    if (!severityCode) {
-      console.log('No severity data found on this Adverse Event Resource ');
+    // Outcome is a CodeableConcept
+    const outcomeCode = translateCode(resource.outcome);
+    if (!outcomeCode) {
+      console.log('No seriousness data found on this Adverse Event Resource ');
     }
+
     // const trialData = { subjectId, trialId, siteId, submissionDate, bundleId };
     const newAdverseEventRow = {
       ...trialData,
+      grade,
       adverseEventCode,
       suspectedCause,
+      suspectedCauseAssessments,
       seriousnessCode,
       categoryCode,
-      severityCode,
       actuality: resource.actuality,
+      outcomeCode,
+      seriousnessOutcome,
       effectiveDate: resource.date,
       recordedDate: resource.recordedDate,
+      resolvedDate: resolvedDate,
     };
     const newRowValues = worksheet.columns.map(
       (col) => newAdverseEventRow[col.key]
