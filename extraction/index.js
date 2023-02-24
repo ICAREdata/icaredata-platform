@@ -298,7 +298,7 @@ const getAdverseEventDataFromExtensions = (adverseEventResource, bundleId) => {
     'http://hl7.org/fhir/us/ctcae/StructureDefinition/adverse-event-resolved-date';
   const seriousnessOutcomeUrl =
     'http://hl7.org/fhir/us/ctcae/StructureDefinition/adverse-event-seriousness-outcome';
-  const grade = getExtensionsByUrl(
+  const adverseEventGrade = getExtensionsByUrl(
     adverseEventResourceExtension,
     gradeUrl,
     true
@@ -313,7 +313,7 @@ const getAdverseEventDataFromExtensions = (adverseEventResource, bundleId) => {
     seriousnessOutcomeUrl,
     true
   );
-  if (!grade) {
+  if (!adverseEventGrade) {
     console.log(`No grade extension was found on Bundle ${bundleId}`);
   }
   if (!resolvedDate) {
@@ -325,10 +325,13 @@ const getAdverseEventDataFromExtensions = (adverseEventResource, bundleId) => {
     );
   }
   return {
-    grade: grade && translateCode(grade.value),
-    resolvedDate: resolvedDate && translateCode(resolvedDate.valueDateTime),
+    resolvedDate: resolvedDate && resolvedDate.valueDateTime,
+    adverseEventGrade:
+      adverseEventGrade &&
+      translateCode(adverseEventGrade.valueCodeableConcept),
     seriousnessOutcome:
-      seriousnessOutcome && translateCode(seriousnessOutcome.value),
+      seriousnessOutcome &&
+      translateCode(seriousnessOutcome.valueCodeableConcept),
   };
 };
 
@@ -350,7 +353,7 @@ const addAdverseEventDataToWorksheet = (bundle, worksheet, trialData) => {
 
   adverseEventResources.forEach((resource) => {
     // All data from extensions
-    const { grade, resolvedDate, seriousnessOutcome } =
+    const { adverseEventGrade, resolvedDate, seriousnessOutcome } =
       getAdverseEventDataFromExtensions(resource, bundleId);
 
     // AdverseEvent data is a CodeableConcept
@@ -393,7 +396,7 @@ const addAdverseEventDataToWorksheet = (bundle, worksheet, trialData) => {
     // const trialData = { subjectId, trialId, siteId, submissionDate, bundleId };
     const newAdverseEventRow = {
       ...trialData,
-      grade,
+      adverseEventGrade,
       adverseEventCode,
       suspectedCause,
       suspectedCauseAssessments,
