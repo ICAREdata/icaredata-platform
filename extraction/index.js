@@ -15,6 +15,9 @@ const knex = require('knex');
 const fhirpath = require('fhirpath');
 archiver.registerFormat('zip-encrypted', require('archiver-zip-encrypted'));
 
+// Delimiter for joining array values
+const ARRAYJOINDELIMITER = ' | ';
+
 // Creates excel workbook with Disease Status and Treatment Plan Change Worksheets
 const createIcareWorkbook = () => {
   const workbook = new exceljs.Workbook();
@@ -50,6 +53,31 @@ const createIcareWorkbook = () => {
     { header: 'Site ID', key: 'siteId', width: 30 },
   ];
 
+  const adverseEventWorksheet = workbook.addWorksheet('Adverse Event');
+  adverseEventWorksheet.columns = [
+    { header: 'Submission Date', key: 'submissionDate', width: 30 },
+    { header: 'Bundle ID', key: 'bundleId', width: 30 },
+    { header: 'Adverse Event Grade', key: 'adverseEventGrade', width: 30 },
+    { header: 'Adverse Event Code', key: 'adverseEventCode', width: 30 },
+    { header: 'Suspected Cause', key: 'suspectedCause', width: 30 },
+    {
+      header: 'Suspected Cause Assessments',
+      key: 'suspectedCauseAssessments',
+      width: 30,
+    },
+    { header: 'Seriousness Code', key: 'seriousnessCode', width: 30 },
+    { header: 'Category Code', key: 'categoryCode', width: 30 },
+    { header: 'Actuality', key: 'actuality', width: 30 },
+    { header: 'Effective Date', key: 'effectiveDate', width: 30 },
+    { header: 'Recorded Date', key: 'recordedDate', width: 30 },
+    { header: 'Outcome Code', key: 'outcomeCode', width: 30 },
+    { header: 'Seriousness Outcome', key: 'seriousnessOutcome', width: 30 },
+    { header: 'Resolved Date', key: 'resolvedDate', width: 30 },
+    { header: 'Subject ID', key: 'subjectId', width: 30 },
+    { header: 'Trial ID', key: 'trialId', width: 30 },
+    { header: 'Site ID', key: 'siteId', width: 30 },
+  ];
+
   return workbook;
 };
 
@@ -60,8 +88,30 @@ const translateCode = (codeObject) => {
     ? codeObject.coding
         .filter((c) => c)
         .map((c) => `${c.system} : ${c.code}`)
-        .join(' | ')
+        .join(ARRAYJOINDELIMITER)
     : '';
+};
+
+const formatSuspectedCauseData = (suspectEntityList) => {
+  // SuspectedEntities have two subcomponents of interest: instances and causality
+  const suspectedCauses = suspectEntityList
+    ? suspectEntityList
+        .map((entity) => {
+          return (
+            entity.instance &&
+            `${entity.instance.type} : ${entity.instance.reference}`
+          );
+        })
+        .join(ARRAYJOINDELIMITER)
+    : '';
+  const suspectedAssessments = suspectEntityList
+    ? suspectEntityList
+        .map((entity) => {
+          return entity.assessment && translateCode(entity.assessment);
+        })
+        .join(ARRAYJOINDELIMITER)
+    : '';
+  return [suspectedCauses, suspectedAssessments];
 };
 
 // Filters Observation list for system and code specific to disease status
@@ -117,7 +167,7 @@ const addDiseaseStatusDataToWorksheet = (bundle, worksheet, trialData) => {
         return translateCode(extension.valueCodeableConcept);
       })
       .filter((evidence) => evidence)
-      .join(' | ');
+      .join(ARRAYJOINDELIMITER);
 
     const condition = getConditionFromFocusReference(
       bundle,
@@ -240,14 +290,149 @@ const addCarePlanDataToWorksheet = (bundle, worksheet, trialData) => {
   });
 };
 
+const getAdverseEventDataFromExtensions = (adverseEventResource, bundleId) => {
+  const adverseEventResourceExtension = adverseEventResource.extension;
+  const gradeUrl =
+    'http://hl7.org/fhir/us/ctcae/StructureDefinition/ctcae-grade';
+  const resolvedDateUrl =
+    'http://hl7.org/fhir/us/ctcae/StructureDefinition/adverse-event-resolved-date';
+  const seriousnessOutcomeUrl =
+    'http://hl7.org/fhir/us/ctcae/StructureDefinition/adverse-event-seriousness-outcome';
+  const adverseEventGrade = getExtensionsByUrl(
+    adverseEventResourceExtension,
+    gradeUrl,
+    true
+  );
+  const resolvedDate = getExtensionsByUrl(
+    adverseEventResourceExtension,
+    resolvedDateUrl,
+    true
+  );
+  const seriousnessOutcome = getExtensionsByUrl(
+    adverseEventResourceExtension,
+    seriousnessOutcomeUrl,
+    true
+  );
+  if (!adverseEventGrade) {
+    console.log(`No grade extension was found on Bundle ${bundleId}`);
+  }
+  if (!resolvedDate) {
+    console.log(`No resolvedDate extension was found on Bundle ${bundleId}`);
+  }
+  if (!seriousnessOutcome) {
+    console.log(
+      `No seriousnessOutcome extension was found on Bundle ${bundleId}`
+    );
+  }
+  return {
+    resolvedDate: resolvedDate && resolvedDate.valueDateTime,
+    adverseEventGrade:
+      adverseEventGrade &&
+      translateCode(adverseEventGrade.valueCodeableConcept),
+    seriousnessOutcome:
+      seriousnessOutcome &&
+      translateCode(seriousnessOutcome.valueCodeableConcept),
+  };
+};
+
+// Add AdverseEvent resources to worksheet
+const addAdverseEventDataToWorksheet = (bundle, worksheet, trialData) => {
+  const bundleId = fhirpath.evaluate(bundle, 'Bundle.id')[0];
+
+  // Get AdverseEvent Resources and add data to worksheet
+  const adverseEventResources = getBundleResourcesByType(
+    bundle,
+    'AdverseEvent',
+    {},
+    false
+  );
+
+  console.log(
+    `${adverseEventResources.length} AdverseEvent Resources found on Bundle ${bundleId}.`
+  );
+
+  adverseEventResources.forEach((resource) => {
+    // All data from extensions
+    const { adverseEventGrade, resolvedDate, seriousnessOutcome } =
+      getAdverseEventDataFromExtensions(resource, bundleId);
+
+    // AdverseEvent data is a CodeableConcept
+    const adverseEventCode = translateCode(resource.event);
+    if (!adverseEventCode) {
+      console.log('No code found on this Adverse Event Resource ');
+    }
+    // Suspected cause data
+    const [suspectedCause, suspectedCauseAssessments] =
+      formatSuspectedCauseData(resource.suspectEntity);
+    if (!suspectedCause) {
+      console.log(
+        'No suspected entity data found on this Adverse Event Resource '
+      );
+    }
+    if (!suspectedCauseAssessments) {
+      console.log(
+        'No suspected entity assessment data found on this Adverse Event Resource '
+      );
+    }
+    // Seriousness data is a CodeableConcept
+    const seriousnessCode = translateCode(resource.seriousness);
+    if (!seriousnessCode) {
+      console.log('No seriousness data found on this Adverse Event Resource ');
+    }
+    // Category data is an array of CodeableConcepts
+    const categoryCode =
+      resource.category &&
+      resource.category.length &&
+      resource.category.map(translateCode).join(ARRAYJOINDELIMITER);
+    if (!categoryCode || categoryCode.length === 0) {
+      console.log('No category data found on this Adverse Event Resource ');
+    }
+    // Outcome is a CodeableConcept
+    const outcomeCode = translateCode(resource.outcome);
+    if (!outcomeCode) {
+      console.log('No seriousness data found on this Adverse Event Resource ');
+    }
+
+    // const trialData = { subjectId, trialId, siteId, submissionDate, bundleId };
+    const newAdverseEventRow = {
+      ...trialData,
+      adverseEventGrade,
+      adverseEventCode,
+      suspectedCause,
+      suspectedCauseAssessments,
+      seriousnessCode,
+      categoryCode,
+      actuality: resource.actuality,
+      outcomeCode,
+      seriousnessOutcome,
+      effectiveDate: resource.date,
+      recordedDate: resource.recordedDate,
+      resolvedDate: resolvedDate,
+    };
+    const newRowValues = worksheet.columns.map(
+      (col) => newAdverseEventRow[col.key]
+    );
+    let duplicate = false;
+    for (let i = 1; i < worksheet.rowCount + 1; i++) {
+      if (_.isEqual(newRowValues, worksheet.getRow(i).values.slice(1))) {
+        duplicate = true;
+        break;
+      }
+    }
+    if (!duplicate) worksheet.addRow(newAdverseEventRow);
+  });
+};
+
 const addIcareDataToWorkbook = (bundle, workbook, trialData) => {
   const diseaseStatusWorksheet = workbook.getWorksheet('Disease Status');
   const treatmentPlanChangeWorksheet = workbook.getWorksheet(
     'Treatment Plan Change'
   );
+  const adverseEventWorksheet = workbook.getWorksheet('Adverse Event');
 
   addDiseaseStatusDataToWorksheet(bundle, diseaseStatusWorksheet, trialData);
   addCarePlanDataToWorksheet(bundle, treatmentPlanChangeWorksheet, trialData);
+  addAdverseEventDataToWorksheet(bundle, adverseEventWorksheet, trialData);
 };
 
 // Processes rows in data.messages and adds to workbook
