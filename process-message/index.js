@@ -27,6 +27,18 @@ const getResponseCode = (response) =>
     JSON.parse(response),
     'Bundle.entry[0].resource.response.code'
   )[0];
+// Get a list of all resourceTypes in the ContainedBundle
+const getResourceTypesInBundle = (containedBundle) =>
+  fhirpath.evaluate(
+    containedBundle,
+    'Bundle.entry.resource.resourceType.distinct()'
+  );
+// For a given resourceType, determine how many of those resources are on a ContainedBundle
+const getResourceCount = (containedBundle, resourceType) =>
+  fhirpath.evaluate(
+    containedBundle,
+    `Bundle.entry.resource.where(resourceType = '${resourceType}').count()`
+  );
 
 exports.handler = async (bundle, context, callback) => {
   const databaseConfig = await getDatabaseConfiguration('Lambda-RDS-Login');
@@ -53,13 +65,13 @@ exports.handler = async (bundle, context, callback) => {
     );
     return;
   }
-  console.log(`Bundle is valid FHIR R4.`);
+  console.log(`Bundle ${bundleId} is valid FHIR R4.`);
 
   if (!isMessageBundle(bundle)) {
     callback(responses.response400(bundleId, 'FHIR Bundle is not a Message.'));
     return;
   }
-  console.log('Verified Bundle is a Message.');
+  console.log(`Verified Bundle ${bundleId} is a Message.`);
 
   const messageHeader = getBundleResourcesByType(
     bundle,
@@ -74,6 +86,12 @@ exports.handler = async (bundle, context, callback) => {
     return;
   }
 
+  // Get SiteId as soon as we have it
+  const siteId = getSiteId(messageHeader);
+  console.log(
+    `Bundle ${bundleId} has MessageHeader specifying siteId ${siteId}. All future logs will start with ${siteId}`
+  );
+
   const containedBundle = getBundleResourcesByType(bundle, 'Bundle', {}, true);
   if (!containedBundle) {
     callback(
@@ -81,7 +99,7 @@ exports.handler = async (bundle, context, callback) => {
     );
     return;
   }
-  console.log('Collected MessageHeader and Bundle.');
+  console.log(`${siteId}: Collected MessageHeader and Bundle.`);
 
   const researchSubject = getBundleResourcesByType(
     containedBundle,
@@ -113,12 +131,11 @@ exports.handler = async (bundle, context, callback) => {
     );
     return;
   }
-  console.log('Collected ResearchSubject and ResearchStudy.');
+  console.log(`${siteId}: Collected ResearchSubject and ResearchStudy.`);
 
   // Collect all information that we want to store in the database
   // from the resources - bundleId was collected earlier
   const subjectId = getSubjectId(researchSubject);
-  const siteId = getSiteId(messageHeader);
   const trialId = getTrialId(researchStudy);
   const hasInfo = bundleId && subjectId && trialId; // siteId not required
   if (!hasInfo) {
@@ -130,7 +147,7 @@ exports.handler = async (bundle, context, callback) => {
     );
     return;
   }
-  console.log('Collected relevant data from Message resources.');
+  console.log(`${siteId}: Collected relevant data from Message resources.`);
 
   // Now that we've collected the data, format it so we can put in the database
   const info = {
@@ -141,16 +158,33 @@ exports.handler = async (bundle, context, callback) => {
     bundle: bundle,
   };
 
-  console.log('Inserting Message data into the database.');
+  // Get some metadata about the bundle for logging
+  const resourceTypes = getResourceTypesInBundle(containedBundle);
+  console.log(
+    `${siteId}: Message's contained bundle contains the following resources`
+  );
+  resourceTypes.forEach((resourceType) => {
+    console.log(
+      `${siteId}: ${resourceType} | ${getResourceCount(
+        containedBundle,
+        resourceType
+      )}`
+    );
+  });
+
+  console.log(`${siteId}: Inserting Message data into the database.`);
   // Finally, try to insert the data into the database
   const response = await dbConnection
     .insert([info])
     .into('data.messages')
     .then((r) => {
-      console.log('Data inserted into database.');
+      console.log(`${siteId}: Data successfully inserted into database.`);
       return responses.response200(bundleId);
     })
     .catch((e) => {
+      console.log(
+        `${siteId}: Error occured while inserting data into the database`
+      );
       console.log(e);
       // The below link describes error codes for PostgreSQL
       // https://www.postgresql.org/docs/9.6/errcodes-appendix.html
