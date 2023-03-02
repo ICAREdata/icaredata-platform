@@ -44,6 +44,21 @@ exports.handler = async (bundle, context, callback) => {
   const databaseConfig = await getDatabaseConfiguration('Lambda-RDS-Login');
   const dbConnection = knex(databaseConfig);
 
+  // Get message header and Site Id early on for logging purposes;
+  // Will use these variables later for validating the shape of the uploaded bundle
+  const messageHeader = getBundleResourcesByType(
+    bundle,
+    'MessageHeader',
+    {},
+    true
+  );
+  const siteId = getSiteId(messageHeader) || 'NO-SITE-ID-PROVIDED';
+  if (!siteId) {
+    console.log(
+      `Log messages may look strange; no site-id was found on bundle's Message Header`
+    );
+  }
+
   // Since bundleId is needed for the response error, we'll check that first
   const bundleId = getBundleId(bundle);
   if (!bundleId) {
@@ -65,32 +80,21 @@ exports.handler = async (bundle, context, callback) => {
     );
     return;
   }
-  console.log(`Bundle ${bundleId} is valid FHIR R4.`);
+  console.log(`${siteId}: Bundle ${bundleId} is valid FHIR R4.`);
 
   if (!isMessageBundle(bundle)) {
     callback(responses.response400(bundleId, 'FHIR Bundle is not a Message.'));
     return;
   }
-  console.log(`Verified Bundle ${bundleId} is a Message.`);
+  console.log(`${siteId}: Verified Bundle ${bundleId} is a Message.`);
 
-  const messageHeader = getBundleResourcesByType(
-    bundle,
-    'MessageHeader',
-    {},
-    true
-  );
+  //
   if (!messageHeader) {
     callback(
       responses.response400(bundleId, 'Message does not contain MessageHeader.')
     );
     return;
   }
-
-  // Get SiteId as soon as we have it
-  const siteId = getSiteId(messageHeader);
-  console.log(
-    `Bundle ${bundleId} has MessageHeader specifying siteId ${siteId}. All future logs will start with ${siteId}`
-  );
 
   const containedBundle = getBundleResourcesByType(bundle, 'Bundle', {}, true);
   if (!containedBundle) {
@@ -183,7 +187,7 @@ exports.handler = async (bundle, context, callback) => {
     })
     .catch((e) => {
       console.log(
-        `${siteId}: Error occured while inserting data into the database`
+        `${siteId}: Error occurred while inserting data into the database`
       );
       console.log(e);
       // The below link describes error codes for PostgreSQL
