@@ -52,11 +52,12 @@ exports.handler = async (bundle, context, callback) => {
     {},
     true
   );
-  const siteId = getSiteId(messageHeader) || 'NO-SITE-ID-PROVIDED';
+  let siteId = getSiteId(messageHeader);
   if (!siteId) {
     console.log(
       `Log messages may look strange; no site-id was found on bundle's Message Header`
     );
+    siteId = 'NO-SITE-ID-PROVIDED';
   }
 
   // Since bundleId is needed for the response error, we'll check that first
