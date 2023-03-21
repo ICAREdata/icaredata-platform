@@ -8,19 +8,24 @@ const capabilityStatement = {
   kind: 'capability',
   fhirVersion: '4.0.1',
   format: ['application/json+fhir'],
-  security: {
-    service: [
-      {
-        coding: [
+  rest: [
+    {
+      mode: 'server',
+      security: {
+        service: [
           {
-            system:
-              'http://terminology.hl7.org/CodeSystem/restful-security-service',
-            code: 'SMART-on-FHIR',
+            coding: [
+              {
+                system:
+                  'http://terminology.hl7.org/CodeSystem/restful-security-service',
+                code: 'SMART-on-FHIR',
+              },
+            ],
           },
         ],
       },
-    ],
-  },
+    },
+  ],
   messaging: [
     {
       endpoint: [
@@ -29,7 +34,8 @@ const capabilityStatement = {
             system: 'http://terminology.hl7.org/CodeSystem/message-transport',
             code: 'http',
           },
-          address: 'https://testing.icaredata.org',
+          address:
+            process.env.ENDPOINT_ADDRESS || 'https://testing.icaredata.org',
         },
       ],
     },
