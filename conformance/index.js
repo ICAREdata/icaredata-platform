@@ -24,6 +24,13 @@ const capabilityStatement = {
           },
         ],
       },
+      operation: [
+        {
+          name: 'process-message',
+          definition:
+            'http://hl7.org/fhir/OperationDefinition/MessageHeader-process-message',
+        },
+      ],
     },
   ],
   messaging: [
